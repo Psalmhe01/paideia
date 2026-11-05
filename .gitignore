@@ -4,5 +4,6 @@ data/*.db
 data/*.db-*
 data/uploads/
 data/seed-attachments/
+public/seed-attachments/
 .env
 *.log

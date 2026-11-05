@@ -17,6 +17,27 @@ Open [Paideia](http://localhost:3001). For development, run `npm.cmd run dev` an
 
 The default listener is `127.0.0.1`. This edition uses one local SQLite profile for study notes, quiz history, and uploads. Scripture verse bookmarks and theme preferences live in the current browser. `PAIDEIA_DATA_DIR` sets a different SQLite and attachment directory. Back up that directory to retain the study profile.
 
+## Deploy to Vercel
+
+The Vercel build serves the Vite app and its deep links and runs the Express API as a Vercel Function. Local development continues to use SQLite. On Vercel, the API uses Neon Postgres for study data and Vercel Blob for user uploads.
+
+1. Import the existing `Psalmhe01/paideia` GitHub repository into Vercel.
+2. From the Vercel project's **Storage** area, create and connect a Neon Postgres database and a **public** Blob store. The integrations add `DATABASE_URL` and `BLOB_READ_WRITE_TOKEN` to the project automatically.
+3. Install the Vercel CLI and link this folder to the Vercel project, then seed its production database from this folder:
+
+   ```powershell
+   npm.cmd install --global vercel
+   vercel.cmd login
+   vercel.cmd link
+   vercel.cmd env run -e production -- npm.cmd run seed
+   ```
+
+4. Commit and push the deployment changes to GitHub. Vercel builds the app and includes the Bible, lexicon, and generated built-in study PDFs. Subsequent pushes to the production branch redeploy it.
+
+Vercel attachment uploads are limited to 4 MB per file to stay within the server upload limit. Uploaded files use public Blob URLs. This app does not currently have sign-in; its study progress and write actions are shared with anyone who can access the deployed URL. Add an access-control layer before using it as a private workspace.
+
+The seed command creates the library corpus in Neon. It does not import local SQLite records. The current local database has no saved notes, quiz attempts, custom records, or uploaded files.
+
 ## Reading rooms
 
 | Room | Route | What you can do |

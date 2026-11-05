@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1540 1040" role="img" aria-labelledby="title desc">
+  <title id="title">Paideia logo options</title>
+  <desc id="desc">Three logo concepts for Paideia: an open book and cross, a Greek pi shaped portico above a book, and an olive branch growing from an open book.</desc>
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#604035" />
+      <stop offset="1" stop-color="#261d1c" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#41312a" flood-opacity=".09" />
+    </filter>
+  </defs>
+  <rect width="1540" height="1040" fill="#f5f1e8" />
+  <text x="72" y="64" fill="#8b5e31" font-family="Arial,sans-serif" font-size="13" font-weight="700" letter-spacing="3.2">PAIDEIA · IDENTITY STUDY</text>
+  <text x="72" y="130" fill="#342621" font-family="Georgia,serif" font-size="50" font-weight="700">Three ways to picture Paideia</text>
+  <text x="74" y="172" fill="#75675d" font-family="Arial,sans-serif" font-size="17">Education as faithful formation: learning that shapes a whole life.</text>
+  <rect x="1301" y="51" width="165" height="38" rx="19" fill="#ebe2d3" />
+  <text x="1383" y="75" text-anchor="middle" fill="#72502d" font-family="Arial,sans-serif" font-size="11" font-weight="700" letter-spacing="1.5">CONCEPT SET 01</text>
+
+  <g filter="url(#shadow)">
+    <rect x="70" y="226" width="440" height="648" rx="22" fill="#fffdf9" />
+    <rect x="550" y="226" width="440" height="648" rx="22" fill="#fffdf9" />
+    <rect x="1030" y="226" width="440" height="648" rx="22" fill="#fffdf9" />
+  </g>
+  <g fill="none" stroke="#e7ded1">
+    <rect x="70.5" y="226.5" width="439" height="647" rx="22" />
+    <rect x="550.5" y="226.5" width="439" height="647" rx="22" />
+    <rect x="1030.5" y="226.5" width="439" height="647" rx="22" />
+  </g>
+
+  <!-- Option A -->
+  <text x="102" y="272" fill="#9a754c" font-family="Arial,sans-serif" font-size="12" font-weight="700" letter-spacing="1.7">A  /  SCRIPTURE &amp; STUDY</text>
+  <text x="102" y="310" fill="#342621" font-family="Georgia,serif" font-size="25" font-weight="700">Word &amp; Way</text>
+  <rect x="102" y="339" width="104" height="104" rx="26" fill="url(#tile)" />
+  <g transform="translate(122 359)" stroke="#efc879" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.25" fill="none">
+    <path d="M7 38.5c8.3-4.1 16.6-3.6 25 2.3 8.4-5.9 16.7-6.4 25-2.3v13c-8.3-4.1-16.6-3.6-25 2.3-8.4-5.9-16.7-6.4-25-2.3v-13Z" />
+    <path d="M32 40.8V15m-7 8h14M32 41c-5.1-4-10.2-5.7-15.5-5.2M32 41c5.1-4 10.2-5.7 15.5-5.2" />
+  </g>
+  <text x="226" y="381" fill="#392b24" font-family="Georgia,serif" font-size="29" font-weight="700">Paideia</text>
+  <text x="227" y="405" fill="#967348" font-family="Arial,sans-serif" font-size="12" letter-spacing=".7">THEOLOGICAL LIBRARY</text>
+  <line x1="102" y1="480" x2="478" y2="480" stroke="#e8dfd3" />
+  <text x="102" y="519" fill="#9a754c" font-family="Arial,sans-serif" font-size="11" font-weight="700" letter-spacing="1.6">THE IDEA</text>
+  <text x="102" y="552" fill="#51453c" font-family="Arial,sans-serif" font-size="16">
+    <tspan x="102" dy="0">An open book anchors a cross, bringing</tspan>
+    <tspan x="102" dy="25">Christian faith and serious study together.</tspan>
+  </text>
+  <rect x="102" y="647" width="376" height="1" fill="#ece4d9" />
+  <text x="102" y="683" fill="#9a754c" font-family="Arial,sans-serif" font-size="11" font-weight="700" letter-spacing="1.5">FEEL</text>
+  <text x="102" y="712" fill="#51453c" font-family="Georgia,serif" font-size="18" font-style="italic">Grounded · Clear · Devotional</text>
+  <text x="102" y="803" fill="#7b6f64" font-family="Arial,sans-serif" font-size="13">A familiar Christian mark, drawn for learning.</text>
+
+  <!-- Option B -->
+  <text x="582" y="272" fill="#9a754c" font-family="Arial,sans-serif" font-size="12" font-weight="700" letter-spacing="1.7">B  /  GREEK ROOTS</text>
+  <text x="582" y="310" fill="#342621" font-family="Georgia,serif" font-size="25" font-weight="700">Classical Portico</text>
+  <rect x="582" y="339" width="104" height="104" rx="26" fill="url(#tile)" />
+  <g transform="translate(602 359)" stroke="#efc879" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.25" fill="none">
+    <path d="M13 15h38v6H45v17h-6V21H25v17h-6V21h-6v-6Z" />
+    <path d="M9 44c8.2-3.7 15.9-3.1 23 2.7 7.1-5.8 14.8-6.4 23-2.7v8.3c-8.2-3.7-15.9-3.1-23 2.7-7.1-5.8-14.8-6.4-23-2.7V44Z" />
+  </g>
+  <text x="706" y="381" fill="#392b24" font-family="Georgia,serif" font-size="29" font-weight="700">Paideia</text>
+  <text x="707" y="405" fill="#967348" font-family="Arial,sans-serif" font-size="12" letter-spacing=".7">THEOLOGICAL LIBRARY</text>
+  <line x1="582" y1="480" x2="958" y2="480" stroke="#e8dfd3" />
+  <text x="582" y="519" fill="#9a754c" font-family="Arial,sans-serif" font-size="11" font-weight="700" letter-spacing="1.6">THE IDEA</text>
+  <text x="582" y="552" fill="#51453c" font-family="Arial,sans-serif" font-size="16">
+    <tspan x="582" dy="0">The Greek Π becomes a temple of learning,</tspan>
+    <tspan x="582" dy="25">resting on the pages of an open book.</tspan>
+  </text>
+  <rect x="582" y="647" width="376" height="1" fill="#ece4d9" />
+  <text x="582" y="683" fill="#9a754c" font-family="Arial,sans-serif" font-size="11" font-weight="700" letter-spacing="1.5">FEEL</text>
+  <text x="582" y="712" fill="#51453c" font-family="Georgia,serif" font-size="18" font-style="italic">Scholarly · Distinctive · Timeless</text>
+  <text x="582" y="803" fill="#7b6f64" font-family="Arial,sans-serif" font-size="13">Keeps a subtle link to the existing Π mark.</text>
+
+  <!-- Option C -->
+  <text x="1062" y="272" fill="#9a754c" font-family="Arial,sans-serif" font-size="12" font-weight="700" letter-spacing="1.7">C  /  FORMATION</text>
+  <text x="1062" y="310" fill="#342621" font-family="Georgia,serif" font-size="25" font-weight="700">Cultivated Wisdom</text>
+  <rect x="1062" y="339" width="104" height="104" rx="26" fill="url(#tile)" />
+  <g transform="translate(1082 359)" stroke="#efc879" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.1" fill="none">
+    <path d="M7 41c8.3-4.2 16.6-3.6 25 2.2 8.4-5.8 16.7-6.4 25-2.2v10.5c-8.3-4.2-16.6-3.6-25 2.2-8.4-5.8-16.7-6.4-25-2.2V41Z" />
+    <path d="M32 43c-.1-10.5.2-19.2 6.2-27.5M33.8 33.1c-6.9-1.5-9-5.7-8.4-9.1 5.3.2 9.1 3.3 8.4 9.1Zm1.1-7.7c1.4-6.2 5.4-9.2 9-8.5-.2 5.3-3.4 9.1-9 8.5Zm-1.1 13.2c-6.7-1.2-9.4-4.9-9-8.4 5.4-.2 9.4 2.6 9 8.4Zm1.5-9.6c1.7-5.7 5.6-8.2 9-7.4-.4 5-3.5 8.4-9 7.4Z" />
+  </g>
+  <text x="1186" y="381" fill="#392b24" font-family="Georgia,serif" font-size="29" font-weight="700">Paideia</text>
+  <text x="1187" y="405" fill="#967348" font-family="Arial,sans-serif" font-size="12" letter-spacing=".7">THEOLOGICAL LIBRARY</text>
+  <line x1="1062" y1="480" x2="1438" y2="480" stroke="#e8dfd3" />
+  <text x="1062" y="519" fill="#9a754c" font-family="Arial,sans-serif" font-size="11" font-weight="700" letter-spacing="1.6">THE IDEA</text>
+  <text x="1062" y="552" fill="#51453c" font-family="Arial,sans-serif" font-size="16">
+    <tspan x="1062" dy="0">An olive branch grows from the book:</tspan>
+    <tspan x="1062" dy="25">study as the patient cultivation of wisdom.</tspan>
+  </text>
+  <rect x="1062" y="647" width="376" height="1" fill="#ece4d9" />
+  <text x="1062" y="683" fill="#9a754c" font-family="Arial,sans-serif" font-size="11" font-weight="700" letter-spacing="1.5">FEEL</text>
+  <text x="1062" y="712" fill="#51453c" font-family="Georgia,serif" font-size="18" font-style="italic">Warm · Reflective · Growing</text>
+  <text x="1062" y="803" fill="#7b6f64" font-family="Arial,sans-serif" font-size="13">A quieter symbol of lifelong formation.</text>
+
+  <line x1="72" y1="918" x2="1468" y2="918" stroke="#ded4c5" />
+  <text x="72" y="957" fill="#51453c" font-family="Arial,sans-serif" font-size="14" font-weight="600">All three are original, scalable SVG marks, designed for the app’s light and dark themes.</text>
+  <text x="72" y="988" fill="#807468" font-family="Arial,sans-serif" font-size="13">Choose A, B, or C. I’ll use your pick to replace the current mark.</text>
+</svg>

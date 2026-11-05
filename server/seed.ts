@@ -1,19 +1,22 @@
 import type { DbInstance } from './db.js';
+import fs from 'node:fs';
 import { ALL_SEED_DISCIPLINES, ALL_SEED_GLOSSARY, ALL_SEED_TOPICS } from './data/index.js';
 import { generateSeedAttachmentFile } from './pdfGenerator.js';
 
 export async function ensureSeeded(instance: DbInstance, force = false): Promise<void> {
   const { db, seedFilesDir } = instance;
+  await instance.ready;
+  fs.mkdirSync(seedFilesDir, { recursive: true });
 
-  const existingTopics = new Set((db.prepare('SELECT slug FROM topics').all() as { slug: string }[]).map(({ slug }) => slug));
+  const existingTopics = new Set(((await db.prepare('SELECT slug FROM topics').all()) as { slug: string }[]).map(({ slug }) => slug));
   const pending = force ? ALL_SEED_TOPICS : ALL_SEED_TOPICS.filter(({ slug }) => !existingTopics.has(slug));
   if (!pending.length) return;
 
-  db.exec('BEGIN IMMEDIATE');
-  try {
+  await db.transaction(async (transactionDb) => {
+    const db = transactionDb;
     const disciplineMap = new Map<string, string>();
 
-    const insertDiscipline = db.prepare(`
+    const insertDiscipline = await db.prepare(`
       INSERT INTO disciplines (
         slug, name, greek_title, transliteration, subtitle, description, icon, accent_color, sort_order
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -23,7 +26,7 @@ export async function ensureSeeded(instance: DbInstance, force = false): Promise
     `);
 
     for (const d of ALL_SEED_DISCIPLINES) {
-      insertDiscipline.run(
+      await insertDiscipline.run(
         d.slug,
         d.name,
         d.greekTitle,
@@ -37,14 +40,18 @@ export async function ensureSeeded(instance: DbInstance, force = false): Promise
       disciplineMap.set(d.slug, d.name);
     }
 
-    const insertGlossary = db.prepare(`
-      INSERT OR REPLACE INTO glossary_terms (
+    const insertGlossary = await db.prepare(`
+      INSERT INTO glossary_terms (
         term, original_script, language, transliteration, pronunciation, category, definition, related_topic_slug
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(term) DO UPDATE SET original_script = excluded.original_script,
+        language = excluded.language, transliteration = excluded.transliteration,
+        pronunciation = excluded.pronunciation, category = excluded.category,
+        definition = excluded.definition, related_topic_slug = excluded.related_topic_slug
     `);
 
     for (const g of ALL_SEED_GLOSSARY) {
-      insertGlossary.run(
+      await insertGlossary.run(
         g.term,
         g.originalScript,
         g.language,
@@ -56,7 +63,7 @@ export async function ensureSeeded(instance: DbInstance, force = false): Promise
       );
     }
 
-    const insertTopic = db.prepare(`
+    const insertTopic = await db.prepare(`
       INSERT INTO topics (
         slug, discipline_slug, title, subtitle, summary, difficulty, reading_minutes, era,
         scripture_refs_json, sections_json, excerpts_json, perspectives_json, key_terms_json,
@@ -70,20 +77,20 @@ export async function ensureSeeded(instance: DbInstance, force = false): Promise
       WHERE topics.is_custom = 0
     `);
 
-    const insertSource = db.prepare(`
+    const insertSource = await db.prepare(`
       INSERT INTO sources (
         topic_slug, title, author, year, repository, source_type, url, citation, summary, is_custom
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
     `);
 
-    const insertAttachment = db.prepare(`
+    const insertAttachment = await db.prepare(`
       INSERT INTO attachments (
         topic_slug, source_id, title, description, file_name, stored_path, mime_type,
         file_size, attachment_kind, preview_text, is_custom
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
     `);
 
-    const insertQuestion = db.prepare(`
+    const insertQuestion = await db.prepare(`
       INSERT INTO quiz_questions (
         topic_slug, discipline_slug, question_type, difficulty, prompt, excerpt_context,
         options_json, correct_index, explanation, source_reference
@@ -91,14 +98,14 @@ export async function ensureSeeded(instance: DbInstance, force = false): Promise
     `);
 
     for (const topic of pending) {
-      const existing = db.prepare('SELECT is_custom FROM topics WHERE slug = ?').get(topic.slug);
+      const existing = await db.prepare('SELECT is_custom FROM topics WHERE slug = ?').get(topic.slug);
       if (existing?.is_custom || (existing && !force)) continue;
       // Clean any partial seed rows for this topic
-      db.prepare('DELETE FROM attachments WHERE topic_slug = ? AND is_custom = 0').run(topic.slug);
-      db.prepare('DELETE FROM sources WHERE topic_slug = ? AND is_custom = 0').run(topic.slug);
-      db.prepare('DELETE FROM quiz_questions WHERE topic_slug = ?').run(topic.slug);
+      await db.prepare('DELETE FROM attachments WHERE topic_slug = ? AND is_custom = 0').run(topic.slug);
+      await db.prepare('DELETE FROM sources WHERE topic_slug = ? AND is_custom = 0').run(topic.slug);
+      await db.prepare('DELETE FROM quiz_questions WHERE topic_slug = ?').run(topic.slug);
 
-      insertTopic.run(
+      await insertTopic.run(
         topic.slug,
         topic.disciplineSlug,
         topic.title,
@@ -117,7 +124,7 @@ export async function ensureSeeded(instance: DbInstance, force = false): Promise
 
       const insertedSourceIds: number[] = [];
       for (const src of topic.sources) {
-        const res = insertSource.run(
+        const res = await insertSource.run(
           topic.slug,
           src.title,
           src.author,
@@ -151,13 +158,15 @@ export async function ensureSeeded(instance: DbInstance, force = false): Promise
           seedFilesDir
         );
 
-        insertAttachment.run(
+        await insertAttachment.run(
           topic.slug,
           linkedSourceId,
           att.title,
           att.description,
           generated.fileName,
-          generated.storedPath,
+          instance.storage === 'postgres'
+            ? `seed-attachments/${generated.fileName}`
+            : generated.storedPath,
           generated.mimeType,
           generated.fileSize,
           att.attachmentKind,
@@ -166,7 +175,7 @@ export async function ensureSeeded(instance: DbInstance, force = false): Promise
       }
 
       for (const q of topic.questions) {
-        insertQuestion.run(
+        await insertQuestion.run(
           topic.slug,
           topic.disciplineSlug,
           q.questionType,
@@ -180,9 +189,5 @@ export async function ensureSeeded(instance: DbInstance, force = false): Promise
         );
       }
     }
-    db.exec('COMMIT');
-  } catch (error) {
-    db.exec('ROLLBACK');
-    throw error;
-  }
+  });
 }

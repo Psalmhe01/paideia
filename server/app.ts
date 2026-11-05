@@ -1,6 +1,7 @@
 import { referenceRouter } from './reference.js';
 import express from 'express';
 import multer from 'multer';
+import { del, put } from '@vercel/blob';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -28,44 +29,68 @@ export function createApp(instance: DbInstance) {
   const { db, uploadsDir } = instance;
   const app = express();
 
+  app.use((req, _res, next) => {
+    if (process.env.VERCEL && !req.path.startsWith('/api')) {
+      req.url = `/api${req.url === '/' ? '' : req.url}`;
+    }
+    next();
+  });
+
+  app.use(async (_req, _res, next) => {
+    try {
+      await instance.ready;
+      next();
+    } catch (error) {
+      next(error);
+    }
+  });
+
   app.use('/api/reference', referenceRouter);
   app.use(express.json({ limit: '5mb' }));
 
-  const storage = multer.diskStorage({
-    destination: (_req, _file, cb) => {
-      cb(null, uploadsDir);
-    },
-    filename: (_req, file, cb) => {
-      const ext = path.extname(file.originalname).slice(0, 16);
-      const base = slugify(path.basename(file.originalname, ext)) || 'attachment';
-      const unique = `${Date.now()}-${crypto.randomBytes(4).toString('hex')}-${base}${ext}`;
-      cb(null, unique);
-    },
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: process.env.VERCEL ? 4 * 1024 * 1024 : 15 * 1024 * 1024 },
   });
 
-  const upload = multer({
-    storage,
-    limits: { fileSize: 15 * 1024 * 1024 }, // 15 MB max upload
-  });
+  async function storeAttachment(fileName: string, buffer: Buffer, mimeType: string): Promise<string> {
+    const ext = path.extname(fileName).slice(0, 16);
+    const base = slugify(path.basename(fileName, ext)) || 'attachment';
+    const unique = `${Date.now()}-${crypto.randomBytes(4).toString('hex')}-${base}${ext}`;
+
+    if (instance.storage === 'postgres') {
+      const blob = await put(`paideia/uploads/${unique}`, buffer, {
+        access: 'public',
+        addRandomSuffix: true,
+        contentType: mimeType,
+      });
+      return blob.url;
+    }
+
+    fs.mkdirSync(uploadsDir, { recursive: true });
+    const storedPath = path.join(uploadsDir, unique);
+    fs.writeFileSync(storedPath, buffer);
+    return storedPath;
+  }
 
   // ---------------------------------------------------------------------------
   // Health
   // ---------------------------------------------------------------------------
-  app.get('/api/health', (_req, res) => {
-    const topicCount = (db.prepare('SELECT COUNT(*) as c FROM topics').get() as { c: number }).c;
+  app.get('/api/health', async (_req, res) => {
+    const topicCount = (await db.prepare('SELECT COUNT(*) as c FROM topics').get() as { c: number }).c;
     res.json({ status: 'ok', topicCount });
   });
 
   // ---------------------------------------------------------------------------
   // Dashboard & Scholar Stats
   // ---------------------------------------------------------------------------
-  app.get('/api/stats', (_req, res) => {
+  app.get('/api/stats', async (_req, res) => {
     const totalDisciplines = (
-      db.prepare('SELECT COUNT(*) as c FROM disciplines').get() as { c: number }
+      await db.prepare('SELECT COUNT(*) as c FROM disciplines').get() as { c: number }
     ).c;
-    const totalTopics = (db.prepare('SELECT COUNT(*) as c FROM topics').get() as { c: number }).c;
+    const totalTopics = (await db.prepare('SELECT COUNT(*) as c FROM topics').get() as { c: number }).c;
     const studiedTopics = (
-      db.prepare('SELECT COUNT(*) as c FROM topic_progress WHERE studied = 1').get() as { c: number }
+      await db.prepare('SELECT COUNT(*) as c FROM topic_progress WHERE studied = 1').get() as { c: number }
     ).c;
     const bookmarkedTopics = (
       db
@@ -77,28 +102,28 @@ export function createApp(instance: DbInstance) {
         .prepare("SELECT COUNT(*) as c FROM topic_progress WHERE trim(notes) != ''")
         .get() as { c: number }
     ).c;
-    const totalSources = (db.prepare('SELECT COUNT(*) as c FROM sources').get() as { c: number }).c;
+    const totalSources = (await db.prepare('SELECT COUNT(*) as c FROM sources').get() as { c: number }).c;
     const totalAttachments = (
-      db.prepare('SELECT COUNT(*) as c FROM attachments').get() as { c: number }
+      await db.prepare('SELECT COUNT(*) as c FROM attachments').get() as { c: number }
     ).c;
     const totalQuestions = (
-      db.prepare('SELECT COUNT(*) as c FROM quiz_questions').get() as { c: number }
+      await db.prepare('SELECT COUNT(*) as c FROM quiz_questions').get() as { c: number }
     ).c;
     const totalGlossary = (
-      db.prepare('SELECT COUNT(*) as c FROM glossary_terms').get() as { c: number }
+      await db.prepare('SELECT COUNT(*) as c FROM glossary_terms').get() as { c: number }
     ).c;
     const missedQuestionsCount = (
-      db.prepare('SELECT COUNT(*) as c FROM missed_questions').get() as { c: number }
+      await db.prepare('SELECT COUNT(*) as c FROM missed_questions').get() as { c: number }
     ).c;
 
-    const attemptStats = db
+    const attemptStats = await db
       .prepare(
         `SELECT COUNT(*) as totalAttempts, COALESCE(AVG(percentage), 0) as avgPercentage
          FROM quiz_attempts`
       )
       .get() as { totalAttempts: number; avgPercentage: number };
 
-    const disciplines = db
+    const disciplines = await db
       .prepare(
         `SELECT
           d.slug, d.name, d.greek_title as greekTitle, d.transliteration, d.subtitle,
@@ -115,7 +140,7 @@ export function createApp(instance: DbInstance) {
       )
       .all();
 
-    const recentAttempts = db
+    const recentAttempts = await db
       .prepare(
         `SELECT id, title, mode, discipline_slug as disciplineSlug, topic_slug as topicSlug,
                 score, total_questions as totalQuestions, percentage, duration_seconds as durationSeconds,
@@ -126,7 +151,7 @@ export function createApp(instance: DbInstance) {
       )
       .all();
 
-    const notebookItems = db
+    const notebookItems = await db
       .prepare(
         `SELECT
           t.slug, t.title, t.subtitle, t.discipline_slug as disciplineSlug,
@@ -164,8 +189,8 @@ export function createApp(instance: DbInstance) {
   // ---------------------------------------------------------------------------
   // Disciplines
   // ---------------------------------------------------------------------------
-  app.get('/api/disciplines', (_req, res) => {
-    const rows = db
+  app.get('/api/disciplines', async (_req, res) => {
+    const rows = await db
       .prepare(
         `SELECT
           d.slug, d.name, d.greek_title as greekTitle, d.transliteration, d.subtitle,
@@ -187,7 +212,7 @@ export function createApp(instance: DbInstance) {
   // ---------------------------------------------------------------------------
   // Topics List & Creation
   // ---------------------------------------------------------------------------
-  app.get('/api/topics', (req, res) => {
+  app.get('/api/topics', async (req, res) => {
     const { discipline, search, difficulty, status } = req.query as Record<
       string,
       string | undefined
@@ -221,7 +246,7 @@ export function createApp(instance: DbInstance) {
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-    const rows = db
+    const rows = await db
       .prepare(
         `SELECT
           t.id, t.slug, t.discipline_slug as disciplineSlug,
@@ -255,9 +280,9 @@ export function createApp(instance: DbInstance) {
     res.json(formatted);
   });
 
-  app.get('/api/topics/:slug', (req, res) => {
+  app.get('/api/topics/:slug', async (req, res) => {
     const { slug } = req.params;
-    const topicRow = db
+    const topicRow = await db
       .prepare(
         `SELECT
           t.*, d.name as disciplineName, d.greek_title as disciplineGreek,
@@ -273,7 +298,7 @@ export function createApp(instance: DbInstance) {
       return;
     }
 
-    const attachmentsRaw = db
+    const attachmentsRaw = await db
       .prepare(
         `SELECT
           a.id, a.topic_slug as topicSlug, a.source_id as sourceId,
@@ -297,7 +322,7 @@ export function createApp(instance: DbInstance) {
       downloadUrl: `/api/attachments/${a.id}/file?download=1`,
     }));
 
-    const sourcesRaw = db
+    const sourcesRaw = await db
       .prepare(
         `SELECT
           id, topic_slug as topicSlug, title, author, year, repository,
@@ -322,7 +347,7 @@ export function createApp(instance: DbInstance) {
     const relatedTopics: Array<Record<string, unknown>> = [];
     if (relatedSlugs.length > 0) {
       const placeholders = relatedSlugs.map(() => '?').join(',');
-      const relRows = db
+      const relRows = await db
         .prepare(
           `SELECT t.slug, t.title, t.subtitle, t.difficulty, t.discipline_slug as disciplineSlug, d.name as disciplineName
            FROM topics t
@@ -333,7 +358,7 @@ export function createApp(instance: DbInstance) {
       relatedTopics.push(...relRows);
     }
 
-    const progressRow = db
+    const progressRow = await db
       .prepare(
         `SELECT studied, bookmarked, notes, last_studied_at as lastStudiedAt
          FROM topic_progress
@@ -343,7 +368,7 @@ export function createApp(instance: DbInstance) {
       | { studied: number; bookmarked: number; notes: string; lastStudiedAt: string }
       | undefined;
 
-    const quizSummary = db
+    const quizSummary = await db
       .prepare(
         `SELECT
           (SELECT COUNT(*) FROM quiz_questions WHERE topic_slug = ?) as questionCount,
@@ -390,7 +415,7 @@ export function createApp(instance: DbInstance) {
   });
 
   // Create custom topic
-  app.post('/api/topics', (req, res) => {
+  app.post('/api/topics', async (req, res) => {
     const {
       disciplineSlug,
       title,
@@ -409,7 +434,7 @@ export function createApp(instance: DbInstance) {
       return;
     }
 
-    const disc = db.prepare('SELECT slug FROM disciplines WHERE slug = ?').get(disciplineSlug);
+    const disc = await db.prepare('SELECT slug FROM disciplines WHERE slug = ?').get(disciplineSlug);
     if (!disc) {
       res.status(400).json({ error: 'Invalid disciplineSlug.' });
       return;
@@ -417,7 +442,7 @@ export function createApp(instance: DbInstance) {
 
     let candidateSlug = slugify(title);
     if (!candidateSlug) candidateSlug = `topic-${Date.now()}`;
-    const existing = db.prepare('SELECT slug FROM topics WHERE slug = ?').get(candidateSlug);
+    const existing = await db.prepare('SELECT slug FROM topics WHERE slug = ?').get(candidateSlug);
     if (existing) {
       candidateSlug = `${candidateSlug}-${Date.now().toString().slice(-4)}`;
     }
@@ -427,7 +452,7 @@ export function createApp(instance: DbInstance) {
         ? sections
         : [{ heading: 'Theological Exposition', body: summary }];
 
-    db.prepare(
+    await db.prepare(
       `INSERT INTO topics (
         slug, discipline_slug, title, subtitle, summary, difficulty, reading_minutes, era,
         scripture_refs_json, sections_json, excerpts_json, perspectives_json, key_terms_json,
@@ -451,15 +476,15 @@ export function createApp(instance: DbInstance) {
   });
 
   // Update study progress & personal notes
-  app.put('/api/topics/:slug/progress', (req, res) => {
+  app.put('/api/topics/:slug/progress', async (req, res) => {
     const { slug } = req.params;
-    const topicExists = db.prepare('SELECT slug FROM topics WHERE slug = ?').get(slug);
+    const topicExists = await db.prepare('SELECT slug FROM topics WHERE slug = ?').get(slug);
     if (!topicExists) {
       res.status(404).json({ error: 'Topic not found' });
       return;
     }
 
-    const current = db
+    const current = await db
       .prepare('SELECT studied, bookmarked, notes FROM topic_progress WHERE topic_slug = ?')
       .get(slug) as { studied: number; bookmarked: number; notes: string } | undefined;
 
@@ -474,7 +499,7 @@ export function createApp(instance: DbInstance) {
     const nextNotes =
       req.body.notes !== undefined ? String(req.body.notes) : (current?.notes ?? '');
 
-    db.prepare(
+    await db.prepare(
       `INSERT INTO topic_progress (topic_slug, studied, bookmarked, notes, last_studied_at)
        VALUES (?, ?, ?, ?, datetime('now'))
        ON CONFLICT(topic_slug) DO UPDATE SET
@@ -501,7 +526,7 @@ export function createApp(instance: DbInstance) {
     res.json(discovered);
   });
 
-  app.get('/api/sources', (req, res) => {
+  app.get('/api/sources', async (req, res) => {
     const { discipline, repository, sourceType, search } = req.query as Record<
       string,
       string | undefined
@@ -532,7 +557,7 @@ export function createApp(instance: DbInstance) {
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-    const sourcesRows = db
+    const sourcesRows = await db
       .prepare(
         `SELECT
           s.id, s.topic_slug as topicSlug, t.title as topicTitle,
@@ -547,7 +572,7 @@ export function createApp(instance: DbInstance) {
       )
       .all(...params) as Array<Record<string, unknown>>;
 
-    const allAttachments = db
+    const allAttachments = await db
       .prepare(
         `SELECT
           id, topic_slug as topicSlug, source_id as sourceId, title, description,
@@ -575,7 +600,7 @@ export function createApp(instance: DbInstance) {
     res.json(formatted);
   });
 
-  app.post('/api/sources', (req, res) => {
+  app.post('/api/sources', async (req, res) => {
     const {
       topicSlug,
       title,
@@ -593,7 +618,7 @@ export function createApp(instance: DbInstance) {
       return;
     }
 
-    const topic = db.prepare('SELECT slug FROM topics WHERE slug = ?').get(topicSlug);
+    const topic = await db.prepare('SELECT slug FROM topics WHERE slug = ?').get(topicSlug);
     if (!topic) {
       res.status(404).json({ error: 'Target topic not found.' });
       return;
@@ -604,7 +629,7 @@ export function createApp(instance: DbInstance) {
       normalizedUrl = `https://${normalizedUrl}`;
     }
 
-    const result = db
+    const result = await db
       .prepare(
         `INSERT INTO sources (
           topic_slug, title, author, year, repository, source_type, url, citation, summary, is_custom
@@ -630,9 +655,9 @@ export function createApp(instance: DbInstance) {
     });
   });
 
-  app.delete('/api/sources/:id', (req, res) => {
+  app.delete('/api/sources/:id', async (req, res) => {
     const id = Number(req.params.id);
-    const row = db.prepare('SELECT id, is_custom FROM sources WHERE id = ?').get(id) as
+    const row = await db.prepare('SELECT id, is_custom FROM sources WHERE id = ?').get(id) as
       | { id: number; is_custom: number }
       | undefined;
     if (!row) {
@@ -643,14 +668,14 @@ export function createApp(instance: DbInstance) {
       res.status(403).json({ error: 'Built-in canonical library sources cannot be deleted.' });
       return;
     }
-    db.prepare('DELETE FROM sources WHERE id = ?').run(id);
+    await db.prepare('DELETE FROM sources WHERE id = ?').run(id);
     res.json({ deleted: true });
   });
 
   // ---------------------------------------------------------------------------
   // Attachments (Linked to Online Sources and/or Topics)
   // ---------------------------------------------------------------------------
-  app.get('/api/attachments', (req, res) => {
+  app.get('/api/attachments', async (req, res) => {
     const { discipline, kind, search } = req.query as Record<string, string | undefined>;
     const conditions: string[] = [];
     const params: string[] = [];
@@ -673,7 +698,7 @@ export function createApp(instance: DbInstance) {
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-    const rows = db
+    const rows = await db
       .prepare(
         `SELECT
           a.id, a.topic_slug as topicSlug, t.title as topicTitle,
@@ -701,7 +726,7 @@ export function createApp(instance: DbInstance) {
     );
   });
 
-  app.post('/api/attachments', upload.single('file'), (req, res) => {
+  app.post('/api/attachments', upload.single('file'), async (req, res) => {
     const {
       topicSlug,
       sourceId,
@@ -716,7 +741,7 @@ export function createApp(instance: DbInstance) {
       return;
     }
 
-    const topic = db.prepare('SELECT slug FROM topics WHERE slug = ?').get(topicSlug);
+    const topic = await db.prepare('SELECT slug FROM topics WHERE slug = ?').get(topicSlug);
     if (!topic) {
       res.status(404).json({ error: 'Target topic not found.' });
       return;
@@ -728,7 +753,7 @@ export function createApp(instance: DbInstance) {
         : null;
 
     if (numericSourceId !== null) {
-      const srcRow = db.prepare('SELECT id FROM sources WHERE id = ?').get(numericSourceId);
+      const srcRow = await db.prepare('SELECT id FROM sources WHERE id = ?').get(numericSourceId);
       if (!srcRow) {
         res.status(400).json({ error: 'Linked sourceId does not exist.' });
         return;
@@ -740,33 +765,27 @@ export function createApp(instance: DbInstance) {
     let mimeType = 'text/markdown; charset=utf-8';
     let fileSize = 0;
     let previewText = '';
+    let content: Buffer;
 
     if (req.file) {
-      fileName = req.file.originalname;
-      storedPath = req.file.path;
+      fileName = path.basename(req.file.originalname).slice(0, 240) || 'attachment';
       mimeType = req.file.mimetype || 'application/octet-stream';
-      fileSize = req.file.size;
+      content = req.file.buffer;
+      storedPath = await storeAttachment(fileName, content, mimeType);
+      fileSize = content.byteLength;
 
       // Extract readable preview for text-based attachments
       if (
         mimeType.startsWith('text/') ||
         /\.(md|markdown|txt|csv|json)$/i.test(fileName)
       ) {
-        try {
-          previewText = fs.readFileSync(storedPath, 'utf8').slice(0, 24000);
-        } catch {
-          previewText = '';
-        }
+        previewText = content.toString('utf8').slice(0, 24000);
       }
     } else if (typeof textContent === 'string' && textContent.trim().length > 0) {
       fileName = `${slugify(title) || 'study-note'}.md`;
-      storedPath = path.join(
-        uploadsDir,
-        `${Date.now()}-${crypto.randomBytes(4).toString('hex')}-${fileName}`
-      );
-      fs.writeFileSync(storedPath, textContent, 'utf8');
-      const st = fs.statSync(storedPath);
-      fileSize = st.size;
+      content = Buffer.from(textContent, 'utf8');
+      storedPath = await storeAttachment(fileName, content, mimeType);
+      fileSize = content.byteLength;
       previewText = textContent.slice(0, 24000);
     } else {
       res.status(400).json({
@@ -775,7 +794,7 @@ export function createApp(instance: DbInstance) {
       return;
     }
 
-    const result = db
+    const result = await db
       .prepare(
         `INSERT INTO attachments (
           topic_slug, source_id, title, description, file_name, stored_path,
@@ -809,16 +828,21 @@ export function createApp(instance: DbInstance) {
     });
   });
 
-  app.get('/api/attachments/:id/file', (req, res) => {
+  app.get('/api/attachments/:id/file', async (req, res) => {
     const id = Number(req.params.id);
-    const row = db
+    const row = await db
       .prepare(
         'SELECT file_name as fileName, stored_path as storedPath, mime_type as mimeType FROM attachments WHERE id = ?'
       )
       .get(id) as { fileName: string; storedPath: string; mimeType: string } | undefined;
 
-    if (!row || !fs.existsSync(row.storedPath)) {
+    if (!row) {
       res.status(404).json({ error: 'Attachment file not found' });
+      return;
+    }
+
+    if (row.storedPath.startsWith('seed-attachments/')) {
+      res.redirect(302, `/${row.storedPath}`);
       return;
     }
 
@@ -832,12 +856,27 @@ export function createApp(instance: DbInstance) {
       const disposition = String(res.getHeader('Content-Disposition'));
       res.setHeader('Content-Disposition', disposition.replace(/^attachment/, 'inline'));
     }
+
+    if (/^https?:\/\//i.test(row.storedPath)) {
+      const blobResponse = await fetch(row.storedPath);
+      if (!blobResponse.ok) {
+        res.status(404).json({ error: 'Attachment file not found' });
+        return;
+      }
+      res.send(Buffer.from(await blobResponse.arrayBuffer()));
+      return;
+    }
+
+    if (!fs.existsSync(row.storedPath)) {
+      res.status(404).json({ error: 'Attachment file not found' });
+      return;
+    }
     fs.createReadStream(row.storedPath).pipe(res);
   });
 
-  app.delete('/api/attachments/:id', (req, res) => {
+  app.delete('/api/attachments/:id', async (req, res) => {
     const id = Number(req.params.id);
-    const row = db
+    const row = await db
       .prepare('SELECT id, stored_path as storedPath, is_custom as isCustom FROM attachments WHERE id = ?')
       .get(id) as { id: number; storedPath: string; isCustom: number } | undefined;
 
@@ -850,8 +889,14 @@ export function createApp(instance: DbInstance) {
       return;
     }
 
-    db.prepare('DELETE FROM attachments WHERE id = ?').run(id);
-    if (row.storedPath && fs.existsSync(row.storedPath)) {
+    await db.prepare('DELETE FROM attachments WHERE id = ?').run(id);
+    if (/^https?:\/\//i.test(row.storedPath)) {
+      try {
+        await del(row.storedPath);
+      } catch {
+        // Keep the attachment record deletion authoritative if object cleanup fails.
+      }
+    } else if (row.storedPath && fs.existsSync(row.storedPath)) {
       try {
         fs.unlinkSync(row.storedPath);
       } catch {
@@ -864,7 +909,7 @@ export function createApp(instance: DbInstance) {
   // ---------------------------------------------------------------------------
   // Glossary / Lexicon
   // ---------------------------------------------------------------------------
-  app.get('/api/glossary', (req, res) => {
+  app.get('/api/glossary', async (req, res) => {
     const { search, language, category } = req.query as Record<string, string | undefined>;
     const conditions: string[] = [];
     const params: string[] = [];
@@ -886,7 +931,7 @@ export function createApp(instance: DbInstance) {
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-    const rows = db
+    const rows = await db
       .prepare(
         `SELECT
           g.id, g.term, g.original_script as originalScript, g.language,
@@ -905,8 +950,8 @@ export function createApp(instance: DbInstance) {
   // ---------------------------------------------------------------------------
   // Quizzes & Catechetical Examination Engine
   // ---------------------------------------------------------------------------
-  app.get('/api/quizzes/overview', (_req, res) => {
-    const byDiscipline = db
+  app.get('/api/quizzes/overview', async (_req, res) => {
+    const byDiscipline = await db
       .prepare(
         `SELECT
           d.slug, d.name, d.greek_title as greekTitle, d.subtitle, d.icon, d.accent_color as accentColor,
@@ -919,7 +964,7 @@ export function createApp(instance: DbInstance) {
       )
       .all();
 
-    const byTopic = db
+    const byTopic = await db
       .prepare(
         `SELECT
           t.slug, t.title, t.discipline_slug as disciplineSlug, d.name as disciplineName,
@@ -934,10 +979,10 @@ export function createApp(instance: DbInstance) {
       .all();
 
     const missedCount = (
-      db.prepare('SELECT COUNT(*) as c FROM missed_questions').get() as { c: number }
+      await db.prepare('SELECT COUNT(*) as c FROM missed_questions').get() as { c: number }
     ).c;
 
-    const history = db
+    const history = await db
       .prepare(
         `SELECT
           id, title, mode, discipline_slug as disciplineSlug, topic_slug as topicSlug,
@@ -957,7 +1002,7 @@ export function createApp(instance: DbInstance) {
     });
   });
 
-  app.post('/api/quizzes/generate', (req, res) => {
+  app.post('/api/quizzes/generate', async (req, res) => {
     const {
       scope = 'discipline',
       topicSlug,
@@ -974,14 +1019,14 @@ export function createApp(instance: DbInstance) {
     if (scope === 'topic' && topicSlug) {
       conditions.push('qq.topic_slug = ?');
       params.push(topicSlug);
-      const t = db.prepare('SELECT title FROM topics WHERE slug = ?').get(topicSlug) as
+      const t = await db.prepare('SELECT title FROM topics WHERE slug = ?').get(topicSlug) as
         | { title: string }
         | undefined;
       quizTitle = t ? `Topic Quiz: ${t.title}` : 'Topic Quiz';
     } else if (scope === 'discipline' && disciplineSlug) {
       conditions.push('qq.discipline_slug = ?');
       params.push(disciplineSlug);
-      const d = db.prepare('SELECT name FROM disciplines WHERE slug = ?').get(disciplineSlug) as
+      const d = await db.prepare('SELECT name FROM disciplines WHERE slug = ?').get(disciplineSlug) as
         | { name: string }
         | undefined;
       quizTitle = d ? `${d.name} Examination` : 'Discipline Quiz';
@@ -1010,7 +1055,7 @@ export function createApp(instance: DbInstance) {
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
     const maxCount = Math.max(1, Math.min(Number(count) || 10, 50));
 
-    const rows = db
+    const rows = await db
       .prepare(
         `SELECT
           qq.id, qq.topic_slug as topicSlug, t.title as topicTitle,
@@ -1049,12 +1094,12 @@ export function createApp(instance: DbInstance) {
     });
   });
 
-  app.post('/api/quizzes/check', (req, res) => {
+  app.post('/api/quizzes/check', async (req, res) => {
     const { questionId, selectedIndex } = req.body ?? {};
     if (!Number.isSafeInteger(questionId) || !Number.isSafeInteger(selectedIndex) || selectedIndex < 0) {
       return res.status(400).json({ error: 'Choose a valid answer first.' });
     }
-    const question = db.prepare(
+    const question = await db.prepare(
       'SELECT correct_index as correctIndex, options_json as optionsJson, explanation, source_reference as sourceReference FROM quiz_questions WHERE id = ?'
     ).get(questionId);
     if (!question) return res.status(404).json({ error: 'Question no longer available.' });
@@ -1065,7 +1110,7 @@ export function createApp(instance: DbInstance) {
     return res.json({ correctIndex, explanation, sourceReference });
   });
 
-  app.post('/api/quizzes/submit', (req, res) => {
+  app.post('/api/quizzes/submit', async (req, res) => {
     const {
       title = 'Theological Quiz',
       mode = 'study',
@@ -1082,7 +1127,7 @@ export function createApp(instance: DbInstance) {
       return;
     }
 
-    const getQuestion = db.prepare(
+    const getQuestion = await db.prepare(
       `SELECT
         qq.id, qq.topic_slug as topicSlug, t.title as topicTitle,
         qq.discipline_slug as disciplineSlug, d.name as disciplineName,
@@ -1094,21 +1139,11 @@ export function createApp(instance: DbInstance) {
        WHERE qq.id = ?`
     );
 
-    const recordMiss = db.prepare(
-      `INSERT INTO missed_questions (question_id, miss_count, last_missed_at)
-       VALUES (?, 1, datetime('now'))
-       ON CONFLICT(question_id) DO UPDATE SET
-         miss_count = miss_count + 1,
-         last_missed_at = datetime('now')`
-    );
-
-    const clearMiss = db.prepare('DELETE FROM missed_questions WHERE question_id = ?');
-
     let score = 0;
     const gradedDetails: Array<Record<string, unknown>> = [];
 
     for (const ans of answers) {
-      const qRow = getQuestion.get(Number(ans.questionId)) as Record<string, unknown> | undefined;
+      const qRow = await getQuestion.get(Number(ans.questionId)) as Record<string, unknown> | undefined;
       if (!qRow) continue;
 
       const selectedIndex = Number(ans.selectedIndex);
@@ -1140,13 +1175,21 @@ export function createApp(instance: DbInstance) {
 
     const percentage = Math.round((score / totalQuestions) * 1000) / 10;
 
-    db.exec('BEGIN IMMEDIATE');
-    let attemptId: number;
-    try {
+    let attemptId = 0;
+    await db.transaction!(async (transactionDb) => {
+      const recordMiss = transactionDb.prepare(
+        `INSERT INTO missed_questions (question_id, miss_count, last_missed_at)
+         VALUES (?, 1, datetime('now'))
+         ON CONFLICT(question_id) DO UPDATE SET
+           miss_count = miss_count + 1,
+           last_missed_at = datetime('now')`
+      );
+      const clearMiss = transactionDb.prepare('DELETE FROM missed_questions WHERE question_id = ?');
+
       for (const detail of gradedDetails) {
-        (detail.isCorrect ? clearMiss : recordMiss).run(Number(detail.questionId));
+        await (detail.isCorrect ? clearMiss : recordMiss).run(Number(detail.questionId));
       }
-      const insertRes = db
+      const insertRes = await transactionDb
         .prepare(
           `INSERT INTO quiz_attempts (
             title, mode, discipline_slug, topic_slug, score, total_questions,
@@ -1165,11 +1208,7 @@ export function createApp(instance: DbInstance) {
           JSON.stringify(gradedDetails)
         );
       attemptId = Number(insertRes.lastInsertRowid);
-      db.exec('COMMIT');
-    } catch (error) {
-      db.exec('ROLLBACK');
-      throw error;
-    }
+    });
 
     res.status(201).json({
       attemptId,
@@ -1186,7 +1225,7 @@ export function createApp(instance: DbInstance) {
   // ---------------------------------------------------------------------------
   // Global Search (Topics, Sources, Attachments, Glossary)
   // ---------------------------------------------------------------------------
-  app.get('/api/search', (req, res) => {
+  app.get('/api/search', async (req, res) => {
     const q = String(req.query.q || '').trim();
     if (!q) {
       res.json({ topics: [], sources: [], attachments: [], glossary: [] });
@@ -1194,7 +1233,7 @@ export function createApp(instance: DbInstance) {
     }
     const like = `%${q}%`;
 
-    const topics = db
+    const topics = await db
       .prepare(
         `SELECT t.slug, t.title, t.subtitle, t.discipline_slug as disciplineSlug, d.name as disciplineName
          FROM topics t
@@ -1204,7 +1243,7 @@ export function createApp(instance: DbInstance) {
       )
       .all(like, like, like, like, like, like);
 
-    const sources = db
+    const sources = await db
       .prepare(
         `SELECT s.id, s.title, s.author, s.repository, s.url, s.topic_slug as topicSlug, t.title as topicTitle
          FROM sources s
@@ -1214,7 +1253,7 @@ export function createApp(instance: DbInstance) {
       )
       .all(like, like, like);
 
-    const attachments = db
+    const attachments = await db
       .prepare(
         `SELECT a.id, a.title, a.attachment_kind as attachmentKind, a.topic_slug as topicSlug, t.title as topicTitle
          FROM attachments a
@@ -1224,7 +1263,7 @@ export function createApp(instance: DbInstance) {
       )
       .all(like, like, like);
 
-    const glossary = db
+    const glossary = await db
       .prepare(
         `SELECT term, original_script as originalScript, language, definition, related_topic_slug as relatedTopicSlug
          FROM glossary_terms
@@ -1240,9 +1279,9 @@ export function createApp(instance: DbInstance) {
   // Production SPA Static Serving (Express 5 compatible wildcard)
   // ---------------------------------------------------------------------------
   const distDir = path.resolve(process.cwd(), 'dist');
-  if (fs.existsSync(distDir)) {
+  if (!process.env.VERCEL && fs.existsSync(distDir)) {
     app.use(express.static(distDir));
-    app.get('/{*splat}', (req, res, next) => {
+    app.get('/{*splat}', async (req, res, next) => {
       if (req.path.startsWith('/api/')) {
         next();
         return;

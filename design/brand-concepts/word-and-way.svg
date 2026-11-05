@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Word and Way</title>
+  <desc id="desc">An open book with a cross rising from its center.</desc>
+  <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.25">
+    <path d="M7 38.5c8.3-4.1 16.6-3.6 25 2.3 8.4-5.9 16.7-6.4 25-2.3v13c-8.3-4.1-16.6-3.6-25 2.3-8.4-5.9-16.7-6.4-25-2.3v-13Z" />
+    <path d="M32 40.8V15m-7 8h14M32 41c-5.1-4-10.2-5.7-15.5-5.2M32 41c5.1-4 10.2-5.7 15.5-5.2" />
+  </g>
+</svg>

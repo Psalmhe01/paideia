@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Classical Portico</title>
+  <desc id="desc">The Greek letter pi forms a classical portico above an open book.</desc>
+  <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.25">
+    <path d="M13 15h38v6H45v17h-6V21H25v17h-6V21h-6v-6Z" />
+    <path d="M9 44c8.2-3.7 15.9-3.1 23 2.7 7.1-5.8 14.8-6.4 23-2.7v8.3c-8.2-3.7-15.9-3.1-23 2.7-7.1-5.8-14.8-6.4-23-2.7V44Z" />
+  </g>
+</svg>

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/handler?__paideia_path=/api/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "functions": {
+    "api/handler.ts": {
+      "includeFiles": "server/data/reference/*.json.gz",
+      "maxDuration": 30
+    }
+  }
+}
