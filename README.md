@@ -7,7 +7,6 @@ Paideia is a local study library for Christian theology, Scripture, church histo
 Use Node.js 22.16 or newer on the 22.x, 24.x, or 26.x release lines. The Windows workspace is `C:\Users\omoso\paideia`.
 
 ```powershell
-Set-Location -LiteralPath 'C:\Users\omoso\paideia'
 npm.cmd ci
 npm.cmd run build
 npm.cmd start
