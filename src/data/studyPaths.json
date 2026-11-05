@@ -1,0 +1,269 @@
+[
+  {
+    "slug": "foundations-of-early-orthodoxy",
+    "title": "Foundations of Early Christian Orthodoxy",
+    "subtitle": "From the sub-apostolic martyrs and the recognition of Sacred Scripture to the Trinitarian and Christological definitions of the Ecumenical Councils.",
+    "description": "Trace the organic maturation of early catholic Christianity across its first five centuries. Beginning with the pastoral epistles of the Apostolic Fathers and the recognition of the twofold biblical Canon, this foundational catechetical sequence follows the Church through the Arian crisis at Nicaea, the Cappadocian articulation of Trinitarian ontology, the Christological synthesis of Chalcedon, and the enduring liturgical confession of the Niceno-Constantinopolitan Creed.",
+    "difficulty": "Foundational",
+    "steps": [
+      {
+        "slug": "apostolic-fathers-ignatius-polycarp-clement",
+        "title": "The Apostolic Fathers: Clement, Ignatius, Polycarp & the Didache",
+        "rationale": "Every inquiry into Christian orthodoxy begins with the immediate disciples of the Apostles—Clement of Rome, Ignatius of Antioch, and Polycarp of Smyrna—who preserved apostolic preaching amidst imperial persecution. Their letters establish the earliest post-New Testament witness to Christ’s real incarnation, Eucharistic worship, and episcopal unity, laying the historical groundwork for all subsequent doctrinal reflection."
+      },
+      {
+        "slug": "formation-of-the-biblical-canon",
+        "title": "Formation of the Biblical Canon",
+        "rationale": "Building directly on the sub-apostolic witness, this step examines how early Christian communities discerned which sacred writings carried genuine apostolic authority alongside the Jewish Scriptures. Understanding the criteria of apostolicity, orthodoxy (κανὼν τῆς ἀληθείας), and catholic liturgical reception clarifies the Scriptural norm to which the later Ecumenical Councils appealed."
+      },
+      {
+        "slug": "first-council-of-nicaea-and-arian-controversy",
+        "title": "The First Council of Nicaea & the Arian Controversy",
+        "rationale": "Once the Scriptural canon was recognized, the fourth-century Church faced an acute interpretive crisis when Arius argued that the Logos was an exalted creature rather than eternally begotten of the Father. Studying the Council of Nicaea (325) shows why the bishops adopted the decisive term ὁμοούσιος (consubstantial) to safeguard both biblical monotheism and the saving divinity of Christ."
+      },
+      {
+        "slug": "trinitarian-perichoresis-and-ousia",
+        "title": "Trinitarian Perichoresis and Ousia",
+        "rationale": "Nicaea’s confession of the Son’s consubstantiality required deeper philosophical and exegetical precision regarding how Father, Son, and Holy Spirit are irreducibly three yet indivisibly one. This step advances the arc by exploring the Cappadocian distinction between μία οὐσία (one essence) and τρεῖς ὑποστάσεις (three persons), together with the mutual indwelling (περιχώρησις) of the Triune God."
+      },
+      {
+        "slug": "chalcedonian-definition-of-faith",
+        "title": "The Chalcedonian Definition of Faith",
+        "rationale": "With Nicene Trinitarianism secured, fifth-century controversy shifted toward how full deity and full humanity unite in the single person of Jesus Christ without division or mixture. The Definition of Chalcedon (451) applies the grammar of φύσις and ὑπόστασις forged in the Trinitarian debates to confess one Christ in two natures—ἀσυγχύτως, ἀτρέπτως, ἀδιαιρέτως, ἀχωρίστως."
+      },
+      {
+        "slug": "nicene-constantinopolitan-creed",
+        "title": "The Nicene-Constantinopolitan Creed",
+        "rationale": "The path culminates in the Niceno-Constantinopolitan Creed (381), the ecumenical baptismal and Eucharistic symbol ratified across Eastern and Western Christendom, including at Chalcedon itself. Revisiting the Creed after studying its Scriptural, Trinitarian, and Christological foundations reveals how conciliar dogma functions doxologically as the living confession of the worshipping Church."
+      }
+    ]
+  },
+  {
+    "slug": "drama-of-redemption-and-grace",
+    "title": "The Drama of Redemption: Soteriology & Grace",
+    "subtitle": "Accomplished at the Cross and applied by the Spirit: atonement, sovereign grace, forensic justification, transformative deification, and Reformation recovery.",
+    "description": "Explore how the Triune God rescues fallen humanity from sin, guilt, and mortality and restores believers to communion with Himself. Moving from the objective work of Christ on Calvary (historia salutis) to the Spirit-wrought application of redemption (ordo salutis), this study path integrates patristic, Eastern Orthodox, Augustinian, and Reformation perspectives on grace, union with Christ, justification, and sanctification.",
+    "difficulty": "Intermediate",
+    "steps": [
+      {
+        "slug": "models-of-the-atonement",
+        "title": "Models of the Atonement",
+        "rationale": "Soteriology begins at the foot of the Cross with the objective accomplishment of redemption in Christ’s death and resurrection. Surveying the biblical and historical motifs of Christus Victor, Anselmian satisfaction, penal substitution, and moral exemplar establishes the multifaceted achievement of Calvary upon which every doctrine of saving grace rests."
+      },
+      {
+        "slug": "augustine-of-hippo-grace-and-trinity",
+        "title": "Augustine of Hippo: Sovereign Grace, Ecclesiology, and the Triune God",
+        "rationale": "Having examined what Christ accomplished objectively for sinners, the student turns to how fallen human wills come to embrace that redemption. Augustine’s anti-Pelagian theology demonstrates the radical bondage of the disordered will and the necessity of prevenient, unmerited divine grace (gratia praeveniens) to heal and liberate human love."
+      },
+      {
+        "slug": "justification-and-union-with-christ",
+        "title": "Justification and Union with Christ",
+        "rationale": "Building upon Augustine’s insistence on sovereign grace, this step investigates the forensic and participative heart of Pauline soteriology: how sinners stand righteous before a holy God. By anchoring imputed righteousness within mystical union with the risen Christ (ἔνωσις σὺν Χριστῷ), the learner sees why pardon and new life are distinct yet inseparable."
+      },
+      {
+        "slug": "theosis-and-sanctification",
+        "title": "Theosis and Sanctification",
+        "rationale": "Union with Christ not only secures forensic pardon (justification) but also initiates lifelong renewal into the likeness of God through the indwelling Spirit. Studying Western progressive sanctification alongside the Eastern patristic doctrine of θέωσις (partaking of the divine nature, 2 Peter 1:4) illuminates the transformative telos of redemption without blurring the Creator-creature distinction."
+      },
+      {
+        "slug": "protestant-reformation-and-solas",
+        "title": "The Protestant Reformation & the Five Solas",
+        "rationale": "This soteriological arc concludes in the sixteenth-century crisis over merit, penance, and assurance that gave rise to the five Reformation solae—sola Scriptura, sola gratia, sola fide, solus Christus, and soli Deo gloria. Synthesizing the earlier steps on atonement, Augustinian grace, justification, and sanctification, this capstone clarifies both historic confessional divergences and enduring ecumenical retrieval."
+      }
+    ]
+  },
+  {
+    "slug": "scripture-text-and-interpretation",
+    "title": "Sacred Text & Sacred Reading: Canon & Hermeneutics",
+    "subtitle": "From Qumran caves and Alexandrian manuscripts to patristic exegesis, grammatical-historical rigor, and Christocentric typology.",
+    "description": "Bridge the disciplines of biblical textual history and theological hermeneutics. This guided curriculum leads the student from the historical world of Second Temple Judaism, the Greek Septuagint, and ancient manuscript transmission into the formation of the Christian Bible and the classic interpretive methodologies by which the Church reads the Old and New Testaments as one unified witness to Christ.",
+    "difficulty": "Intermediate",
+    "steps": [
+      {
+        "slug": "second-temple-judaism-and-dead-sea-scrolls",
+        "title": "Second Temple Judaism & the Dead Sea Scrolls",
+        "rationale": "Faithful biblical interpretation begins with historical immersion in the Jewish matrix within which Jesus ministered and the earliest Christian Scriptures took shape. Examining Second Temple sects, apocalyptic expectation, and the Qumran Dead Sea Scrolls anchors our understanding of the Hebrew Bible’s pluriform textual landscape prior to the first century."
+      },
+      {
+        "slug": "septuagint-and-textual-transmission",
+        "title": "The Septuagint, Manuscripts & Textual Transmission",
+        "rationale": "Advancing from the Judean desert into the Hellenistic diaspora, this step traces the translation of the Hebrew Scriptures into Greek—the Septuagint (LXX)—and the scribal transmission of New Testament papyri and uncial codices. Grasping how the Apostles cited the LXX and how textual criticism reconstructs the autographs prepares the student to ask how those transmitted texts became canonical Scripture."
+      },
+      {
+        "slug": "formation-of-the-biblical-canon",
+        "title": "Formation of the Biblical Canon",
+        "rationale": "Having traced the material production and transmission of ancient manuscripts, the curriculum turns to the theological and historical process by which the two-testament Christian Canon was recognized. Understanding canonical boundaries provides the essential bridge from textual history to hermeneutics, since reading Scripture as a unified canon presupposes its divinely superintended coherence."
+      },
+      {
+        "slug": "alexandrian-vs-antiochene-exegesis",
+        "title": "Alexandrian vs. Antiochene Exegesis",
+        "rationale": "Once a two-testament Canon stood at the heart of Christian worship, patristic interpreters debated how best to draw spiritual meaning from the literal text. Contrasting Alexandrian allegory and θεωρία (Origen, Cyril) with Antiochene historical-grammatical sobriety and σκοπός (John Chrysostom, Theodore of Mopsuestia) introduces the classic tension that shapes all subsequent exegesis."
+      },
+      {
+        "slug": "grammatical-historical-and-canonical-method",
+        "title": "Grammatical-Historical & Canonical Method",
+        "rationale": "Refining the Antiochene concern for authorial intent through Renaissance humanism and Reformation scholarship, this step explores rigorous philological, literary, and historical-contextual exegesis (sensus literalis). Pairing grammatical-historical analysis with canonical reading ensures that critical precision serves, rather than fragments, the theological unity of Scripture."
+      },
+      {
+        "slug": "typology-and-christocentric-hermeneutics",
+        "title": "Typology & Christocentric Hermeneutics",
+        "rationale": "The hermeneutical path culminates in biblical typology (τύπος and ἀντίτυπος), uniting historical fidelity with redemptive-historical fulfillment in Jesus the Messiah (Luke 24:27). Building directly upon both patristic θεωρία and grammatical-historical discipline, Christocentric typology demonstrates how Old Testament persons, institutions, and covenants escalate organically toward their eschatological goal in Christ."
+      }
+    ]
+  },
+  {
+    "slug": "faith-seeking-understanding",
+    "title": "Fides Quaerens Intellectum: Apologetics & Dogma",
+    "subtitle": "Where philosophical natural theology and historical resurrection evidence converge with the deepest mysteries of Christology, theodicy, and the Spirit-filled Church.",
+    "description": "Named after Anselm of Canterbury’s classic motto—“faith seeking understanding”—this advanced curriculum demonstrates the profound reciprocity between public apologetics and systematic dogma. Moving from metaphysical arguments for a necessary Creator and historical evidence for the Resurrection through the crucible of evil and suffering, the path ascends into the hypostatic union of the Crucified Word and the Spirit-empowered witness of the Church.",
+    "difficulty": "Advanced",
+    "steps": [
+      {
+        "slug": "cosmological-and-teleological-arguments",
+        "title": "Cosmological and Teleological Arguments",
+        "rationale": "The ascent of faith seeking understanding opens on the terrain of natural theology, examining metaphysical contingency, cosmic beginning (kalām and Thomistic causal series), and rational fine-tuning. Establishing the philosophical intelligibility of a transcendent, purposeful Creator clears away reductive naturalism and frames the question of whether that Creator has spoken within human history."
+      },
+      {
+        "slug": "historical-resurrection-apologetics-companion",
+        "title": "Historical Resurrection Apologetics",
+        "rationale": "Moving from general revelation in cosmos and telos to special revelation in history, this step evaluates the historiographical evidence surrounding Jesus of Nazareth’s empty tomb, post-mortem appearances, and the explosive rise of Easter faith. If God raised Jesus bodily from the dead, philosophical theism is decisively specified around the identity and claims of the Risen Lord."
+      },
+      {
+        "slug": "theodicy-and-problem-of-evil",
+        "title": "Theodicy and the Problem of Evil",
+        "rationale": "Even when cosmic design and resurrection evidence compel intellectual assent, the pervasive reality of horrendous evil and innocent suffering poses the sharpest existential and logical objection to Christian theism. Engaging logical and evidential arguments from evil—through Augustinian privation, free-will defense, soul-making, and cruciform solidarity—prepares the mind to see why only an incarnate, suffering God can answer suffering from within."
+      },
+      {
+        "slug": "christology-and-hypostatic-union",
+        "title": "Christology and the Hypostatic Union",
+        "rationale": "Christian theodicy and resurrection apologetics both presuppose a staggering dogmatic claim: that in Jesus Christ the eternal Logos personally assumed a complete human nature (ἕνωσις καθ᾽ ὑπόστασιν). Studying the metaphysics of the hypostatic union, communicatio idiomatum, and dyothelitism reveals the ontological ground that enables God truly to suffer in the flesh and conquer death from the inside."
+      },
+      {
+        "slug": "pneumatology-and-ecclesiology",
+        "title": "Pneumatology and Ecclesiology",
+        "rationale": "The curriculum concludes by asking how the Risen, Incarnate Christ makes His truth experientially present and credible in the world today. Through the person and mission of the Holy Spirit (Πνευματολογία) animating the one, holy, catholic, and apostolic Church (Ἐκκλησία) in Word, sacrament, and costly love, reasoned apologetics and high Christology are embodied as living communal witness."
+      }
+    ]
+  },
+  {
+    "slug": "catechetical-foundations",
+    "title": "Catechetical Foundations: God, Christ & Salvation",
+    "subtitle": "An entry-to-intermediate curriculum through classical Trinitarian doctrine and soteriology.",
+    "description": "Designed in the spirit of ancient catechetical schools in Alexandria and Jerusalem, this path guides learners from the Triune nature of God and the person of Christ to the saving work of the Cross and union with God.",
+    "difficulty": "Foundational",
+    "steps": [
+      {
+        "slug": "trinitarian-orthodoxy-nicaea",
+        "title": "The Doctrine of the Trinity: Ousia, Hypostases & Perichoresis",
+        "rationale": "Begin with the Christian doctrine of God: one divine essence eternally subsisting as Father, Son, and Holy Spirit."
+      },
+      {
+        "slug": "hypostatic-union-christology",
+        "title": "Christology & the Hypostatic Union",
+        "rationale": "Examine how the eternal Son assumed full humanity for our redemption without confusion or division."
+      },
+      {
+        "slug": "theories-of-the-atonement",
+        "title": "Models & Mysteries of the Atonement",
+        "rationale": "Explore the multifaceted biblical witness to Christ’s saving victory, sacrifice, and reconciliation."
+      },
+      {
+        "slug": "justification-grace-and-theosis",
+        "title": "Grace, Justification, Sanctification & Theosis",
+        "rationale": "Compare how historic Christian traditions articulate forgiveness, renewal, and participation in divine life."
+      },
+      {
+        "slug": "nicene-constantinopolitan-creed-companion",
+        "title": "The Apostles’ & Nicene-Constantinopolitan Creeds",
+        "rationale": "Synthesize your doctrinal study in the Church’s enduring liturgical confession of faith."
+      }
+    ]
+  },
+  {
+    "slug": "canon-and-hermeneutics",
+    "title": "Scripture, Manuscripts & Hermeneutics",
+    "subtitle": "How the Bible was written, preserved, canonized, and faithfully interpreted.",
+    "description": "Trace the journey of Sacred Scripture from ancient Hebrew scrolls and Greek papyri to canonical recognition and disciplined grammatical-historical and canonical exegesis.",
+    "difficulty": "Intermediate",
+    "steps": [
+      {
+        "slug": "hebrew-tanakh-and-dead-sea-scrolls",
+        "title": "The Hebrew Bible, Septuagint & Dead Sea Scrolls",
+        "rationale": "Ground your study in the formation and textual preservation of the Hebrew Scriptures and Septuagint."
+      },
+      {
+        "slug": "new-testament-canon-and-textual-criticism",
+        "title": "New Testament Canon & Textual Criticism",
+        "rationale": "Understand apostolicity, catholicity, liturgical reception, and manuscript transmission of the New Testament."
+      },
+      {
+        "slug": "alexandria-antioch-and-quadriga",
+        "title": "Patristic Exegesis & the Medieval Quadriga",
+        "rationale": "Survey how early and medieval interpreters balanced literal history with Christological typology and allegory."
+      },
+      {
+        "slug": "grammatical-historical-and-canonical-exegesis",
+        "title": "Grammatical-Historical & Canonical Hermeneutics",
+        "rationale": "Practice modern philological, literary, and canonical principles for responsible interpretation."
+      }
+    ]
+  },
+  {
+    "slug": "apostolic-fathers-to-reformation",
+    "title": "Patristic Witness & Historical Turning Points",
+    "subtitle": "Walk chronologically through the Fathers, Councils, East–West Schism, and Reformations.",
+    "description": "Follow the organic development of theology in its historical crucible—from Ignatius and Irenaeus through Athanasius, the Cappadocians, Augustine, Chalcedon, 1054, and the 16th century.",
+    "difficulty": "Intermediate",
+    "steps": [
+      {
+        "slug": "apostolic-fathers-and-irenaeus",
+        "title": "The Apostolic Fathers & Irenaeus of Lyons",
+        "rationale": "Meet the immediate post-apostolic generation and Irenaeus’s defense against Gnosticism."
+      },
+      {
+        "slug": "athanasius-cappadocians-and-augustine",
+        "title": "Golden Age of the Fathers: East & West",
+        "rationale": "Compare the towering fourth- and fifth-century Greek and Latin Fathers."
+      },
+      {
+        "slug": "chalcedon-and-seven-councils",
+        "title": "The Seven Ecumenical Councils & Reformation Confessions",
+        "rationale": "See how conciliar debates clarified Christology and sacred imagery."
+      },
+      {
+        "slug": "great-schism-1054",
+        "title": "The East–West Schism of 1054",
+        "rationale": "Analyze the estrangement between Greek East and Latin West."
+      },
+      {
+        "slug": "reformation-and-counter-reformation",
+        "title": "The Reformations & Catholic Counter-Reformation",
+        "rationale": "Assess the theological upheavals and confessional renewals of sixteenth-century Europe."
+      }
+    ]
+  },
+  {
+    "slug": "apologetics-in-practice",
+    "title": "Apologetics in Practice",
+    "subtitle": "Natural theology, epistemic method, historical Resurrection analysis, and theodicy.",
+    "description": "Engage philosophical and historical challenges to Christian faith with intellectual rigor and pastoral humility.",
+    "difficulty": "Advanced",
+    "steps": [
+      {
+        "slug": "classical-natural-theology-and-methods",
+        "title": "Apologetic Methodologies & Classical Natural Theology",
+        "rationale": "Compare apologetic methodologies and examine classical cosmological, teleological, and moral arguments."
+      },
+      {
+        "slug": "historical-apologetics-and-resurrection",
+        "title": "Historical Apologetics & the Resurrection of Jesus",
+        "rationale": "Investigate early creedal traditions (1 Cor 15:3–7) and historical criteria for Jesus’s Resurrection."
+      },
+      {
+        "slug": "problem-of-evil-and-theodicy",
+        "title": "The Problem of Evil, Suffering & Theodicy",
+        "rationale": "Wrestle carefully with Augustinian, Irenaean, free-will defense, and cruciform responses to suffering."
+      }
+    ]
+  }
+]

@@ -1,0 +1,468 @@
+@layer components {
+  .ref-page {
+    display: grid;
+    gap: 1.35rem;
+    padding-bottom: 3rem;
+  }
+  .ref-kicker {
+    font-size: 0.7rem;
+    line-height: 1.5;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 750;
+    color: var(--ref-accent);
+  }
+  .ref-title {
+    font: 700 clamp(2.35rem, 5vw, 4.25rem)/0.98 var(--font-display);
+    margin-top: 0.2em;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+  }
+  .ref-heading {
+    font: 700 clamp(1.45rem, 3vw, 2.05rem)/1.1 var(--font-display);
+    overflow-wrap: anywhere;
+  }
+  .ref-deck {
+    color: var(--ref-muted);
+    font-size: 0.95rem;
+    line-height: 1.65;
+    max-width: 45rem;
+    margin-top: 0.65rem;
+  }
+  .ref-muted {
+    color: var(--ref-muted);
+  }
+  .ref-card,
+  .ref-inset {
+    border: 1px solid var(--ref-border);
+    border-radius: 1.15rem;
+    background: var(--ref-surface);
+    padding: clamp(0.9rem, 2.5vw, 1.5rem);
+    min-width: 0;
+  }
+  .ref-inset {
+    background: var(--ref-inset);
+  }
+  .ref-interactive {
+    transition:
+      border-color 0.18s,
+      background 0.18s;
+    display: block;
+  }
+  .ref-interactive:hover {
+    border-color: var(--ref-accent);
+    background: var(--ref-inset);
+  }
+  .ref-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+  .ref-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    border-radius: 0.65rem;
+    border: 1px solid var(--ref-border);
+    background: var(--ref-surface);
+    padding: 0.6rem 0.85rem;
+    min-height: 2.6rem;
+    font-size: 0.82rem;
+    font-weight: 650;
+    line-height: 1.35;
+    cursor: pointer;
+    transition:
+      background 0.18s,
+      border-color 0.18s;
+  }
+  .ref-button:hover {
+    border-color: var(--ref-accent);
+  }
+  .ref-button[aria-pressed="true"],
+  .ref-button[aria-current="page"] {
+    background: var(--ref-selected);
+    color: var(--ref-accent);
+    border-color: var(--ref-accent);
+  }
+  .ref-button-primary {
+    background: var(--ref-action);
+    color: #fff9ed;
+    border-color: var(--ref-action);
+  }
+  .ref-button-primary:hover {
+    background: var(--ref-action-hover);
+    color: #fff9ed;
+  }
+  .ref-button:disabled {
+    opacity: 0.52;
+    cursor: default;
+  }
+  .ref-link {
+    font-weight: 650;
+    color: var(--ref-accent);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
+    text-underline-offset: 0.18em;
+    overflow-wrap: anywhere;
+  }
+  .ref-link:hover {
+    text-decoration-color: currentColor;
+  }
+  .ref-field {
+    display: grid;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    line-height: 1.3;
+    font-weight: 650;
+    min-width: 0;
+  }
+  .ref-field :is(input, select) {
+    min-height: 2.6rem;
+    min-width: 0;
+    width: 100%;
+    border-radius: 0.65rem;
+    border: 1px solid var(--ref-border);
+    background: var(--ref-inset);
+    padding: 0.6rem 0.75rem;
+    color: inherit;
+    font: inherit;
+    font-weight: 500;
+  }
+  .ref-field input.pl-9 {
+    padding-inline-start: 2.25rem;
+  }
+  :is(a, button, input, select, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--ref-focus);
+    outline-offset: 3px;
+  }
+  .bible-paper {
+    width: min(100%, 52rem);
+    margin-inline: auto;
+    padding: clamp(0.85rem, 4vw, 2.25rem);
+  }
+  .bible-verse {
+    display: grid;
+    grid-template-columns: 1.8rem minmax(0, 1fr) 1.95rem;
+    align-items: start;
+    gap: 0.45rem;
+    border-radius: 0.5rem;
+    padding: 0.24rem 0.35rem;
+  }
+  .bible-verse[data-focused="true"] {
+    background: var(--ref-selected);
+    outline: 1px solid var(--ref-accent);
+  }
+  .verse-save {
+    display: grid;
+    place-items: center;
+    margin-top: 0.05rem;
+    height: 1.95rem;
+    border-radius: 0.35rem;
+    color: var(--ref-accent);
+    cursor: pointer;
+  }
+  .verse-save:hover,
+  .verse-save[aria-pressed="true"] {
+    background: var(--ref-selected);
+  }
+  .atlas-banner {
+    min-height: 14rem;
+    border-radius: 1.4rem;
+    display: grid;
+    align-content: end;
+    padding: clamp(1.25rem, 5vw, 3rem);
+    overflow: hidden;
+    background:
+      linear-gradient(90deg, #271b24 0%, #271b24e8 25%, #271b2459 100%),
+      url("/art/mediterranean-port.jpg") center 52% / cover;
+    color: #fff4e3;
+  }
+  .atlas-banner .ref-kicker {
+    color: #ffcc8b;
+  }
+  .atlas-banner .ref-deck {
+    color: #fff0dc;
+  }
+  .timeline-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--ref-border);
+    border-radius: 0.9rem;
+    background: var(--ref-inset);
+  }
+  .timeline-plot {
+    min-width: 36rem;
+    position: relative;
+    margin-inline: 0.85rem;
+  }
+  .timeline-axis {
+    position: absolute;
+    inset-inline: 3%;
+    height: 1px;
+    background: var(--ref-muted);
+  }
+  .timeline-tick {
+    height: 7px;
+    width: 1px;
+    background: var(--ref-muted);
+    position: absolute;
+  }
+  .timeline-tick span {
+    position: absolute;
+    transform: translateX(-50%);
+    top: 0.65rem;
+    font-size: 0.66rem;
+    white-space: nowrap;
+  }
+  .timeline-point,
+  .timeline-key {
+    --plot-color: #785225;
+  }
+  :is(.timeline-point, .timeline-key)[data-type="Texts"] {
+    --plot-color: #465971;
+  }
+  :is(.timeline-point, .timeline-key)[data-type="Church & society"] {
+    --plot-color: #70536c;
+  }
+  .timeline-key {
+    background: var(--plot-color);
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 50%;
+  }
+  .timeline-point {
+    position: absolute;
+    transform: translateX(-50%);
+    height: 26px;
+    padding: 0 0.37rem;
+    border-radius: 0.4rem;
+    font-size: 0.68rem;
+    font-weight: 750;
+    color: white;
+    background: var(--plot-color);
+    cursor: pointer;
+  }
+  .timeline-point::after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 100%;
+    height: var(--stem);
+    width: 1px;
+    background: var(--plot-color);
+    left: 50%;
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  .timeline-point[aria-pressed="true"] {
+    box-shadow:
+      0 0 0 2px var(--ref-surface),
+      0 0 0 4px var(--plot-color);
+    z-index: 1;
+  }
+  .timeline-events {
+    display: grid;
+    align-content: start;
+    max-height: 18rem;
+    overflow: auto;
+    gap: 0.2rem;
+    padding: 0.2rem;
+  }
+  .timeline-events button {
+    display: grid;
+    grid-template-columns: 5.4rem 1fr;
+    align-items: baseline;
+    text-align: left;
+    gap: 0.4rem;
+    padding: 0.5rem 0.6rem;
+    border-radius: 0.5rem;
+    font-size: 0.82rem;
+    cursor: pointer;
+  }
+  .timeline-events button:hover,
+  .timeline-events button[aria-pressed="true"] {
+    background: var(--ref-selected);
+    color: var(--ref-accent);
+  }
+  .concept-stage {
+    border: 1px solid var(--ref-border);
+    border-inline-start: 3px solid var(--ref-accent);
+    background: var(--ref-surface);
+    border-radius: 0.65rem;
+    padding: 0.75rem;
+  }
+  .tradition-root {
+    margin: 0 auto;
+    width: fit-content;
+    padding: 0.65rem 1rem;
+    border-radius: 0.65rem;
+    background: var(--ref-selected);
+    color: var(--ref-accent);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    font-size: 0.86rem;
+  }
+  .tradition-root::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    border-left: 1px solid var(--ref-border);
+    height: 1rem;
+  }
+  .tradition-root {
+    position: relative;
+  }
+  .tradition-branches {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+    position: relative;
+    margin-top: 1rem;
+  }
+  @media (min-width: 780px) {
+    .tradition-branches {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .book-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 1rem;
+  }
+  .book-cover {
+    width: clamp(3.3rem, 7vw, 5rem);
+    aspect-ratio: 4 / 5.8;
+    border: 1px solid #f0c28b6b;
+    outline: 1px solid #674a32;
+    border-radius: 0.25rem 0.45rem 0.45rem 0.25rem;
+    box-shadow:
+      inset 4px 0 #18101c60,
+      1px 4px 5px #2c1c152c;
+    background: #47304a;
+    color: #ffdeb0;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 0.4rem;
+    padding-inline: 0.2rem;
+  }
+  .book-cover span {
+    font: 700 clamp(0.55rem, 1.1vw, 0.78rem) var(--font-display);
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+  .book-cover[data-shelf="Church Fathers"],
+  .book-cover[data-shelf="Church History"] {
+    background: #4a3028;
+  }
+  .book-cover[data-shelf="Scripture"],
+  .book-cover[data-shelf="Spiritual Life"] {
+    background: #364536;
+  }
+  .step-marker {
+    min-width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--ref-selected);
+    color: var(--ref-accent);
+    font-weight: 750;
+    font-size: 0.8rem;
+  }
+  .article-markdown {
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+  }
+  .article-markdown
+    :is(p, ul, ol, blockquote, h3, h4)
+    + :is(p, ul, ol, blockquote, h3, h4) {
+    margin-top: 0.7em;
+  }
+  .article-markdown ul {
+    list-style: disc;
+    padding-inline-start: 1.5em;
+  }
+  .article-markdown ol {
+    list-style: decimal;
+    padding-inline-start: 1.5em;
+  }
+  .article-markdown blockquote {
+    border-inline-start: 2px solid var(--ref-accent);
+    padding-inline-start: 0.85em;
+    font-style: italic;
+  }
+  .article-markdown a {
+    color: var(--ref-accent);
+    text-decoration: underline;
+  }
+  .article-markdown :is(h1, h2, h3, h4) {
+    font-family: var(--font-display);
+    font-size: 1.45em;
+    font-weight: 700;
+    margin-block: 0.8em 0.3em;
+    line-height: 1.12;
+  }
+  .article-markdown h1 {
+    font-size: 1.65em;
+  }
+  .article-markdown hr {
+    margin-block: 0.9em;
+    border-color: var(--ref-border);
+  }
+  .ref-table-scroll {
+    margin-block: 1em;
+    overflow-x: auto;
+  }
+  .ref-table-scroll table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.9em;
+  }
+  .ref-table-scroll :is(th, td) {
+    border: 1px solid var(--ref-border);
+    padding: 0.45rem 0.65rem;
+    min-width: 6.5rem;
+    vertical-align: top;
+  }
+  .ref-table-scroll th {
+    background: var(--ref-inset);
+  }
+  .archive-hero {
+    background-image:
+      linear-gradient(90deg, #251925 0%, #251925de 42%, #25192555 100%),
+      url("/art/manuscript-archive.jpg");
+    background-size: cover;
+    background-position: center 53%;
+  }
+}
+
+:root {
+  --ref-surface: #fffdf9;
+  --ref-inset: #f7f0e6;
+  --ref-border: #ded2c3;
+  --ref-muted: #66584c;
+  --ref-accent: #81421e;
+  --ref-focus: #a14f26;
+  --ref-selected: #f0dfcc;
+  --ref-action: #824323;
+  --ref-action-hover: #663217;
+}
+.dark {
+  color-scheme: dark;
+  --ref-surface: #211c1a;
+  --ref-inset: #2a2420;
+  --ref-border: #4a3c33;
+  --ref-muted: #d2bfae;
+  --ref-accent: #f4bf86;
+  --ref-focus: #ffd398;
+  --ref-selected: #493123;
+  --ref-action: #8d4829;
+  --ref-action-hover: #a55735;
+}

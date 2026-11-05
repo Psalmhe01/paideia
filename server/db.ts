@@ -1,0 +1,163 @@
+import { DatabaseSync } from 'node:sqlite';
+import fs from 'node:fs';
+import path from 'node:path';
+
+export interface DbInstance {
+  db: DatabaseSync;
+  dataDir: string;
+  uploadsDir: string;
+  seedFilesDir: string;
+}
+
+let defaultInstance: DbInstance | null = null;
+
+export function createDatabase(customDataDir?: string): DbInstance {
+  const dataDir = customDataDir || path.resolve(process.cwd(), 'data');
+  const uploadsDir = path.join(dataDir, 'uploads');
+  const seedFilesDir = path.join(dataDir, 'seed-attachments');
+
+  fs.mkdirSync(dataDir, { recursive: true });
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  fs.mkdirSync(seedFilesDir, { recursive: true });
+
+  const dbPath = path.join(dataDir, 'paideia.db');
+  const db = new DatabaseSync(dbPath);
+
+  db.exec('PRAGMA journal_mode = WAL;');
+  db.exec('PRAGMA foreign_keys = ON;');
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS disciplines (
+      slug TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      greek_title TEXT NOT NULL,
+      transliteration TEXT NOT NULL,
+      subtitle TEXT NOT NULL,
+      description TEXT NOT NULL,
+      icon TEXT NOT NULL,
+      accent_color TEXT NOT NULL,
+      sort_order INTEGER NOT NULL DEFAULT 0
+    );
+
+    CREATE TABLE IF NOT EXISTS topics (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      slug TEXT NOT NULL UNIQUE,
+      discipline_slug TEXT NOT NULL REFERENCES disciplines(slug) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      subtitle TEXT NOT NULL,
+      summary TEXT NOT NULL,
+      difficulty TEXT NOT NULL DEFAULT 'Foundational',
+      reading_minutes INTEGER NOT NULL DEFAULT 10,
+      era TEXT NOT NULL DEFAULT '',
+      scripture_refs_json TEXT NOT NULL DEFAULT '[]',
+      sections_json TEXT NOT NULL DEFAULT '[]',
+      excerpts_json TEXT NOT NULL DEFAULT '[]',
+      perspectives_json TEXT NOT NULL DEFAULT '[]',
+      key_terms_json TEXT NOT NULL DEFAULT '[]',
+      related_topic_slugs_json TEXT NOT NULL DEFAULT '[]',
+      is_custom INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS sources (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      topic_slug TEXT NOT NULL REFERENCES topics(slug) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      author TEXT NOT NULL,
+      year TEXT NOT NULL DEFAULT '',
+      repository TEXT NOT NULL DEFAULT 'User Contributed',
+      source_type TEXT NOT NULL DEFAULT 'Primary Text',
+      url TEXT NOT NULL,
+      citation TEXT NOT NULL DEFAULT '',
+      summary TEXT NOT NULL DEFAULT '',
+      is_custom INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS attachments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      topic_slug TEXT NOT NULL REFERENCES topics(slug) ON DELETE CASCADE,
+      source_id INTEGER REFERENCES sources(id) ON DELETE SET NULL,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      file_name TEXT NOT NULL,
+      stored_path TEXT NOT NULL,
+      mime_type TEXT NOT NULL,
+      file_size INTEGER NOT NULL DEFAULT 0,
+      attachment_kind TEXT NOT NULL DEFAULT 'Uploaded Document',
+      preview_text TEXT NOT NULL DEFAULT '',
+      is_custom INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS quiz_questions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      topic_slug TEXT NOT NULL REFERENCES topics(slug) ON DELETE CASCADE,
+      discipline_slug TEXT NOT NULL REFERENCES disciplines(slug) ON DELETE CASCADE,
+      question_type TEXT NOT NULL DEFAULT 'multiple_choice',
+      difficulty TEXT NOT NULL DEFAULT 'Foundational',
+      prompt TEXT NOT NULL,
+      excerpt_context TEXT NOT NULL DEFAULT '',
+      options_json TEXT NOT NULL,
+      correct_index INTEGER NOT NULL,
+      explanation TEXT NOT NULL,
+      source_reference TEXT NOT NULL DEFAULT ''
+    );
+
+    CREATE TABLE IF NOT EXISTS glossary_terms (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      term TEXT NOT NULL UNIQUE,
+      original_script TEXT NOT NULL,
+      language TEXT NOT NULL,
+      transliteration TEXT NOT NULL,
+      pronunciation TEXT NOT NULL,
+      category TEXT NOT NULL,
+      definition TEXT NOT NULL,
+      related_topic_slug TEXT NOT NULL DEFAULT ''
+    );
+
+    CREATE TABLE IF NOT EXISTS topic_progress (
+      topic_slug TEXT PRIMARY KEY REFERENCES topics(slug) ON DELETE CASCADE,
+      studied INTEGER NOT NULL DEFAULT 0,
+      bookmarked INTEGER NOT NULL DEFAULT 0,
+      notes TEXT NOT NULL DEFAULT '',
+      last_studied_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS quiz_attempts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      mode TEXT NOT NULL DEFAULT 'study',
+      discipline_slug TEXT,
+      topic_slug TEXT,
+      score INTEGER NOT NULL,
+      total_questions INTEGER NOT NULL,
+      percentage REAL NOT NULL,
+      duration_seconds INTEGER NOT NULL DEFAULT 0,
+      details_json TEXT NOT NULL DEFAULT '[]',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS missed_questions (
+      question_id INTEGER PRIMARY KEY REFERENCES quiz_questions(id) ON DELETE CASCADE,
+      miss_count INTEGER NOT NULL DEFAULT 1,
+      last_missed_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_topics_discipline ON topics(discipline_slug);
+    CREATE INDEX IF NOT EXISTS idx_sources_topic ON sources(topic_slug);
+    CREATE INDEX IF NOT EXISTS idx_attachments_topic ON attachments(topic_slug);
+    CREATE INDEX IF NOT EXISTS idx_attachments_source ON attachments(source_id);
+    CREATE INDEX IF NOT EXISTS idx_questions_topic ON quiz_questions(topic_slug);
+    CREATE INDEX IF NOT EXISTS idx_questions_discipline ON quiz_questions(discipline_slug);
+  `);
+
+  return { db, dataDir, uploadsDir, seedFilesDir };
+}
+
+export function getDb(): DbInstance {
+  if (!defaultInstance) {
+    defaultInstance = createDatabase(process.env.PAIDEIA_DATA_DIR);
+  }
+  return defaultInstance;
+}
