@@ -12,7 +12,7 @@ npm.cmd run build
 npm.cmd start
 ```
 
-Open [Paideia](http://localhost:3001). For development, run `npm.cmd run dev` and open [the Vite server](http://localhost:5173).
+For live development, run `npm.cmd run dev` and open [Paideia](http://localhost:3001). Vite serves the UI on port 3001 with hot reload, and the Express API runs on port 3002. To preview the built app through Express, run `npm.cmd run build` and then `npm.cmd start`.
 
 The default listener is `127.0.0.1`. This edition uses one local SQLite profile for study notes, quiz history, and uploads. Scripture verse bookmarks and theme preferences live in the current browser. `PAIDEIA_DATA_DIR` sets a different SQLite and attachment directory. Back up that directory to retain the study profile.
 
@@ -22,14 +22,18 @@ The Vercel build serves the Vite app and its deep links and runs the Express API
 
 1. Import the existing `Psalmhe01/paideia` GitHub repository into Vercel.
 2. From the Vercel project's **Storage** area, create and connect a Neon Postgres database and a **public** Blob store. The integrations add `DATABASE_URL` and `BLOB_READ_WRITE_TOKEN` to the project automatically.
-3. Install the Vercel CLI and link this folder to the Vercel project, then seed its production database from this folder:
+3. Seed the production database from this folder. In the Neon Console, open the connected database and copy its pooled connection string. In PowerShell, run this from the project folder; the prompt keeps the connection string out of command history and the variable is removed when seeding finishes:
 
    ```powershell
-   npm.cmd install --global vercel
-   vercel.cmd login
-   vercel.cmd link
-   vercel.cmd env run -e production -- npm.cmd run seed
+   $env:DATABASE_URL = Read-Host 'Paste Neon pooled connection string'
+   try {
+     npm.cmd run seed
+   } finally {
+     Remove-Item Env:DATABASE_URL -ErrorAction SilentlyContinue
+   }
    ```
+
+   Vercel production secret values are available to deployed functions but are not pulled by `vercel env run`. Connect Neon to the project and use its connection string locally for this one-time seed.
 
 4. Commit and push the deployment changes to GitHub. Vercel builds the app and includes the Bible, lexicon, and generated built-in study PDFs. Subsequent pushes to the production branch redeploy it.
 

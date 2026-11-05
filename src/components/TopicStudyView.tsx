@@ -103,7 +103,7 @@ export function TopicStudyView({
   }
 
   return (
-    <div className="space-y-8 pb-16">
+    <div className="min-w-0 space-y-8 pb-16">
       {/* Top Action & Breadcrumb Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-stone-200 dark:border-stone-800">
         <button
@@ -172,7 +172,7 @@ export function TopicStudyView({
       </div>
 
       {/* Title Card */}
-      <header className="rounded-3xl bg-[#fffdf9] dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-7 sm:p-10 space-y-4 shadow-xs">
+      <header className="min-w-0 rounded-3xl bg-[#fffdf9] dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-5 sm:p-10 space-y-4 shadow-xs">
         <div className="flex flex-wrap items-center gap-2.5 text-xs">
           <span className={`px-3 py-1 rounded-full font-semibold ${accent.badge}`}>
             {topic.disciplineName} • {topic.disciplineGreek}
@@ -195,13 +195,13 @@ export function TopicStudyView({
           )}
         </div>
 
-        <h1 className="font-display text-3xl sm:text-5xl font-bold text-stone-900 dark:text-stone-50 leading-tight">
+        <h1 className="break-words font-display text-3xl sm:text-5xl font-bold text-stone-900 dark:text-stone-50 leading-tight">
           {topic.title}
         </h1>
-        <p className="font-reading italic text-xl text-amber-900/90 dark:text-amber-300/90">
+        <p className="break-words font-reading italic text-xl text-amber-900/90 dark:text-amber-300/90">
           {topic.subtitle}
         </p>
-        <p className="font-reading text-lg text-stone-700 dark:text-stone-300 leading-relaxed pt-1">
+        <p className="break-words font-reading text-lg text-stone-700 dark:text-stone-300 leading-relaxed pt-1">
           {topic.summary}
         </p>
 
@@ -234,22 +234,22 @@ export function TopicStudyView({
       {['trinity-theology-proper', 'trinitarian-orthodoxy-nicaea', 'the-trinity', 'trinity'].includes(topic.slug) && <TrinityGuide />}
 
       {/* Main Two-Column Scholarly Layout */}
-      <div className="grid lg:grid-cols-12 gap-8">
+      <div className="grid min-w-0 lg:grid-cols-12 gap-8">
         {/* Left / Center Reading Column */}
-        <div className="lg:col-span-8 space-y-8">
+        <div className="min-w-0 lg:col-span-8 space-y-8">
           {/* Exposition Sections */}
           <div className="space-y-6">
             {topic.sections.map((sec, idx) => (
               <section
                 key={idx}
                 id={`section-${idx}`}
-                className="rounded-2xl bg-[#fffdf9] dark:bg-stone-900 border border-stone-200/90 dark:border-stone-800 p-6 sm:p-8 space-y-4 shadow-xs"
+                className="min-w-0 rounded-2xl bg-[#fffdf9] dark:bg-stone-900 border border-stone-200/90 dark:border-stone-800 p-4 sm:p-8 space-y-4 shadow-xs"
               >
-                <div className="flex items-baseline gap-3">
+                <div className="min-w-0 flex items-baseline gap-3">
                   <span className="font-display text-2xl font-bold text-amber-800/70 dark:text-amber-500/70">
                     {String(idx + 1).padStart(2, '0')}.
                   </span>
-                  <h2 className="font-display text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100">
+                  <h2 className="min-w-0 break-words font-display text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100">
                     {sec.heading}
                   </h2>
                 </div>
@@ -338,7 +338,7 @@ export function TopicStudyView({
           {/* ONLINE RESOURCES & COMPANION ATTACHMENTS */}
           <section
             id="sources-and-attachments"
-            className="rounded-3xl bg-[#fffdf9] dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 sm:p-8 space-y-6"
+            className="min-w-0 rounded-3xl bg-[#fffdf9] dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-4 sm:p-8 space-y-6"
           >
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
@@ -375,7 +375,7 @@ export function TopicStudyView({
               {topic.sources.map((src) => (
                 <div
                   key={src.id}
-                  className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50/70 dark:bg-stone-950/50 p-5 space-y-4"
+                  className="min-w-0 rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50/70 dark:bg-stone-950/50 p-4 sm:p-5 space-y-4"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="space-y-1.5 min-w-0">
@@ -391,12 +391,12 @@ export function TopicStudyView({
                         </span>
                       </div>
 
-                      <h3 className="font-display text-xl font-bold text-stone-900 dark:text-stone-100">
+                      <h3 className="break-words font-display text-xl font-bold text-stone-900 dark:text-stone-100">
                         <a
                           href={src.url}
                           target="_blank"
                           rel="noreferrer"
-                          className="hover:text-amber-800 dark:hover:text-amber-400 inline-flex items-center gap-1.5"
+                          className="min-w-0 break-words hover:text-amber-800 dark:hover:text-amber-400 inline-flex items-center gap-1.5"
                         >
                           {src.title}
                           <ExternalLink className="w-4 h-4 shrink-0 text-amber-700 dark:text-amber-400" />
@@ -537,7 +537,7 @@ export function TopicStudyView({
         </div>
 
         {/* Right Scholarly Marginalia Column */}
-        <aside className="lg:col-span-4 space-y-6">
+        <aside className="min-w-0 lg:col-span-4 space-y-6">
           {/* Key Theological Terms */}
           {topic.keyTerms.length > 0 && (
             <div className="rounded-2xl bg-[#fffdf9] dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-5 space-y-3.5">

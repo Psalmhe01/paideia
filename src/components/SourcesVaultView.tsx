@@ -79,7 +79,7 @@ export function SourcesVaultView({
   }
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="min-w-0 space-y-6 pb-12">
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
@@ -113,10 +113,10 @@ export function SourcesVaultView({
       </div>
 
       {/* Mode Switcher */}
-      <div className="flex gap-2 border-b border-stone-200 dark:border-stone-800 pb-3">
+      <div className="flex flex-wrap gap-2 border-b border-stone-200 dark:border-stone-800 pb-3">
         <button
           onClick={() => setActiveTab('sources')}
-          className={`px-4 py-2 rounded-xl text-sm font-semibold inline-flex items-center gap-2 transition ${
+          className={`min-w-0 flex-1 justify-center px-3 py-2 rounded-xl text-sm text-center font-semibold inline-flex items-center gap-2 transition ${
             activeTab === 'sources'
               ? 'bg-stone-900 text-white dark:bg-amber-600'
               : 'bg-[#fffdf9] dark:bg-stone-900 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-800'
@@ -127,7 +127,7 @@ export function SourcesVaultView({
         </button>
         <button
           onClick={() => setActiveTab('attachments')}
-          className={`px-4 py-2 rounded-xl text-sm font-semibold inline-flex items-center gap-2 transition ${
+          className={`min-w-0 flex-1 justify-center px-3 py-2 rounded-xl text-sm text-center font-semibold inline-flex items-center gap-2 transition ${
             activeTab === 'attachments'
               ? 'bg-stone-900 text-white dark:bg-amber-600'
               : 'bg-[#fffdf9] dark:bg-stone-900 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-800'
@@ -139,8 +139,8 @@ export function SourcesVaultView({
       </div>
 
       {/* Filters */}
-      <div className="grid sm:grid-cols-12 gap-3 p-4 rounded-2xl bg-[#fffdf9] dark:bg-stone-900 border border-stone-200 dark:border-stone-800">
-        <div className="sm:col-span-5 relative">
+      <div className="grid min-w-0 sm:grid-cols-12 gap-3 p-4 rounded-2xl bg-[#fffdf9] dark:bg-stone-900 border border-stone-200 dark:border-stone-800">
+        <div className="min-w-0 sm:col-span-5 relative">
           <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
@@ -151,7 +151,7 @@ export function SourcesVaultView({
           />
         </div>
 
-        <div className="sm:col-span-4">
+        <div className="min-w-0 sm:col-span-4">
           <select
             value={disciplineFilter}
             onChange={(e) => setDisciplineFilter(e.target.value)}
@@ -166,7 +166,7 @@ export function SourcesVaultView({
           </select>
         </div>
 
-        <div className="sm:col-span-3">
+        <div className="min-w-0 sm:col-span-3">
           {activeTab === 'sources' ? (
             <select
               value={repoFilter}
@@ -205,11 +205,11 @@ export function SourcesVaultView({
       {loading ? (
         <div className="text-center py-12 text-sm text-stone-500">Loading library vault...</div>
       ) : activeTab === 'sources' ? (
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid min-w-0 md:grid-cols-2 gap-4">
           {sources.map((src) => (
             <div
               key={src.id}
-              className="rounded-2xl bg-[#fffdf9] dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-5 flex flex-col justify-between space-y-4 shadow-xs"
+              className="min-w-0 rounded-2xl bg-[#fffdf9] dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-4 sm:p-5 flex flex-col justify-between space-y-4 shadow-xs"
             >
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
@@ -229,12 +229,12 @@ export function SourcesVaultView({
                   </button>
                 </div>
 
-                <h3 className="font-display text-xl font-bold text-stone-900 dark:text-stone-100">
+                <h3 className="min-w-0 break-words font-display text-xl font-bold text-stone-900 dark:text-stone-100">
                   <a
                     href={src.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="hover:text-amber-800 dark:hover:text-amber-400 inline-flex items-center gap-1.5"
+                    className="min-w-0 break-words hover:text-amber-800 dark:hover:text-amber-400 inline-flex items-center gap-1.5"
                   >
                     {src.title}
                     <ExternalLink className="w-4 h-4 shrink-0 text-amber-700" />
@@ -251,7 +251,7 @@ export function SourcesVaultView({
                   </button>
                 </p>
 
-                <p className="text-sm text-stone-700 dark:text-stone-300 leading-relaxed">
+                <p className="break-words text-sm text-stone-700 dark:text-stone-300 leading-relaxed">
                   {src.summary}
                 </p>
 
@@ -320,29 +320,29 @@ export function SourcesVaultView({
           ))}
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid min-w-0 md:grid-cols-2 gap-4">
           {attachments.map((att) => (
             <div
               key={att.id}
-              className="rounded-2xl bg-[#fffdf9] dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-5 flex flex-col justify-between space-y-4 shadow-xs"
+              className="min-w-0 rounded-2xl bg-[#fffdf9] dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-4 sm:p-5 flex flex-col justify-between space-y-4 shadow-xs"
             >
               <div className="space-y-2">
-                <div className="flex items-center justify-between gap-2 text-xs">
+                <div className="flex flex-wrap items-start justify-between gap-2 text-xs">
                   <span className="px-2.5 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-300 font-semibold">
                     {att.attachmentKind}
                   </span>
-                  <span className="text-stone-500">
+                  <span className="min-w-0 break-all text-right text-stone-500">
                     {att.fileName} • {formatBytes(att.fileSize)}
                   </span>
                 </div>
 
-                <h3 className="font-display text-xl font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                <h3 className="min-w-0 break-words font-display text-xl font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
                   <FileText className="w-5 h-5 text-amber-800 dark:text-amber-400 shrink-0" />
-                  <span>{att.title}</span>
+                  <span className="min-w-0 break-words">{att.title}</span>
                 </h3>
 
                 {att.description && (
-                  <p className="text-sm text-stone-700 dark:text-stone-300">{att.description}</p>
+                  <p className="break-words text-sm text-stone-700 dark:text-stone-300">{att.description}</p>
                 )}
 
                 <div className="text-xs text-stone-500 space-y-0.5">
@@ -366,7 +366,7 @@ export function SourcesVaultView({
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-stone-200/80 dark:border-stone-800 flex items-center justify-between gap-2">
+              <div className="pt-3 border-t border-stone-200/80 dark:border-stone-800 flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => onPreviewAttachment(att)}

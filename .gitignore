@@ -7,3 +7,5 @@ data/seed-attachments/
 public/seed-attachments/
 .env
 *.log
+.vercel
+.env*

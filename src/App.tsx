@@ -95,6 +95,7 @@ export default function App() {
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setMobileMenuOpen(false);
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setSearchModalOpen((open) => !open);
@@ -217,7 +218,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen flex bg-[#faf7f2] dark:bg-[#12100e] text-stone-900 dark:text-stone-100">
+    <div className="min-h-screen min-w-0 flex overflow-x-clip bg-[#faf7f2] dark:bg-[#12100e] text-stone-900 dark:text-stone-100">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex w-72 shrink-0 flex-col border-r border-stone-200/90 dark:border-stone-800 bg-[#f5efe4]/80 dark:bg-stone-950/80 sticky top-0 h-screen">
         {/* Brand Header */}
@@ -307,9 +308,9 @@ export default function App() {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 min-w-0 flex flex-col">
+      <div className="flex-1 min-w-0 flex flex-col pt-14 lg:pt-0">
         {/* Mobile Top Header */}
-        <header className="lg:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-[#f5efe4]/95 dark:bg-stone-950/95 backdrop-blur-xs border-b border-stone-200 dark:border-stone-800">
+        <header className="lg:hidden fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between px-4 bg-[#f5efe4]/95 dark:bg-stone-950/95 backdrop-blur-xs border-b border-stone-200 dark:border-stone-800">
           <Link to="/" className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-amber-900 text-amber-100 flex items-center justify-center font-display text-lg font-bold">
               Π
@@ -335,7 +336,7 @@ export default function App() {
             <button
               onClick={() => setMobileMenuOpen((o) => !o)}
               className="p-2 rounded-lg text-stone-700 dark:text-stone-200"
-              aria-label="Menu"
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={mobileMenuOpen}
               aria-controls="mobile-navigation"
             >
@@ -345,12 +346,25 @@ export default function App() {
         </header>
 
         {mobileMenuOpen && (
-          <nav id="mobile-navigation" aria-label="Mobile navigation" className="lg:hidden grid grid-cols-2 bg-[#f5efe4] dark:bg-stone-950 border-b border-stone-200 dark:border-stone-800 px-4 py-3">
-            {renderNav(navItems)}
-          </nav>
+          <>
+            <button
+              type="button"
+              className="lg:hidden fixed inset-0 z-40 bg-stone-950/30"
+              aria-label="Close navigation menu"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <nav
+              id="mobile-navigation"
+              aria-label="Mobile navigation"
+              className="lg:hidden fixed inset-x-0 top-14 z-50 grid grid-cols-2 gap-x-2 gap-y-1 overflow-y-auto border-b border-stone-200 bg-[#f5efe4] px-4 py-3 shadow-xl dark:border-stone-800 dark:bg-stone-950"
+              style={{ maxHeight: 'calc(100dvh - 3.5rem)' }}
+            >
+              {renderNav(navItems)}
+            </nav>
+          </>
         )}
 
-        <main id="main-content" className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-8 pt-6 sm:pt-8">
+        <main id="main-content" className="flex-1 min-w-0 max-w-6xl w-full mx-auto px-4 sm:px-8 pt-6 sm:pt-8">
           {coreError && <div role="alert" className="ref-card mb-4">The study server could not be reached. <button className="ref-link" onClick={refreshCoreData}>Try again</button></div>}
           <Suspense fallback={<p role="status">Opening the reading room…</p>}>
           <Routes>

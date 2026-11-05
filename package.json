@@ -4,8 +4,8 @@
   "description": "Paideia — Theological Library, Primary Sources, Attachments & Catechetical Quiz Platform",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k -n SERVER,CLIENT \"tsx watch server/index.ts\" \"vite\"",
-    "dev:server": "tsx watch server/index.ts",
+    "dev": "concurrently -k -n SERVER,CLIENT \"tsx watch server/dev.ts\" \"vite\"",
+    "dev:server": "tsx watch server/dev.ts",
     "dev:client": "vite",
     "build": "tsx server/buildSeedAssets.ts && vite build",
     "build:client": "vite build",
