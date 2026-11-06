@@ -187,7 +187,7 @@ function toPostgresSql(sql: string): string {
   return output
     .replace(/\bdatetime\('now'\)/gi, "to_char((now() AT TIME ZONE 'UTC'), 'YYYY-MM-DD HH24:MI:SS')")
     .replace(/\bLIKE\b/gi, 'ILIKE')
-    .replace(/\bAS\s+([a-z_][a-z0-9_]*[A-Z][A-Za-z0-9_]*)\b/g, 'AS "$1"');
+    .replace(/\bAS\s+([a-z_][a-z0-9_]*[A-Z][A-Za-z0-9_]*)\b/gi, 'AS "$1"');
 }
 
 type PostgresResult = {

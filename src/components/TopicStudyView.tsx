@@ -197,7 +197,7 @@ export function TopicStudyView({
 
       <EditorialHero eyebrow={`${topic.disciplineName} · ${topic.disciplineGreek} · ${topic.difficulty}`}
         title={topic.title} description={`${topic.subtitle}. ${topic.summary}`}
-        image={studyImageFor(topic.disciplineSlug).src} imageAlt={studyImageFor(topic.disciplineSlug).alt}
+        image={studyImageFor(topic.disciplineSlug, `${topic.title} ${topic.slug}`).src} imageAlt={studyImageFor(topic.disciplineSlug, `${topic.title} ${topic.slug}`).alt}
         className="study-editorial-hero">
         <div className="study-hero-meta"><span><Clock className="w-3.5 h-3.5" /> {topic.readingMinutes} min study</span>
           {topic.era && <span>{topic.era}</span>}

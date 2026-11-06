@@ -46,8 +46,9 @@ export const editorialImages = {
   },
 } as const;
 
-export function studyImageFor(disciplineSlug: string, topic = '') {
-  const subject = `${disciplineSlug} ${topic}`.toLowerCase();
+export function studyImageFor(disciplineSlug: string | null | undefined, topic = '') {
+  const discipline = typeof disciplineSlug === 'string' ? disciplineSlug : '';
+  const subject = `${discipline} ${topic}`.toLowerCase();
   if (/reformation|luther|calvin|protestant|printing press|95 theses|confession/.test(subject)) return editorialImages.printing;
   if (/orthodox|byzantine|icon|trinity|nicene|arian|cappadoc|christology/.test(subject)) return editorialImages.orthodox;
   if (/baptism|eucharist|sacrament|liturgy|worship|prayer|monastic|devotion/.test(subject)) return editorialImages.worship;
@@ -57,8 +58,8 @@ export function studyImageFor(disciplineSlug: string, topic = '') {
   if (/scripture|bible|canon|translation|exegesis|hermeneutic|hebrew|gospel|testament/.test(subject)) return editorialImages.scripture;
   if (/church.?history|patristic|church fathers|council|creed|schism|medieval|apostolic/.test(subject)) return editorialImages.history;
   if (/atonement|soteriology|salvation|theology|doctrine|god|christ/.test(subject)) return editorialImages.sanctuary;
-  if (disciplineSlug.includes('history') || disciplineSlug.includes('patristic')) return editorialImages.history;
-  if (disciplineSlug.includes('bible') || disciplineSlug.includes('hermeneutic')) return editorialImages.scripture;
-  if (disciplineSlug.includes('doctrine') || disciplineSlug.includes('soteriology')) return editorialImages.sanctuary;
+  if (discipline.includes('history') || discipline.includes('patristic')) return editorialImages.history;
+  if (discipline.includes('bible') || discipline.includes('hermeneutic')) return editorialImages.scripture;
+  if (discipline.includes('doctrine') || discipline.includes('soteriology')) return editorialImages.sanctuary;
   return editorialImages.library;
 }
