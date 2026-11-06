@@ -15,15 +15,17 @@ import {
   Paperclip,
   Plus,
   Quote,
-  Save,
   Trash2,
   Eye,
   Download,
   BookOpen,
 } from 'lucide-react';
 import type { AttachmentItem, TopicDetail } from '../types';
-import { formatBytes, getAccentClasses } from './DisciplineIcon';
+import { formatBytes } from './DisciplineIcon';
 import { api } from '../api';
+import { EditorialHero } from './EditorialHero';
+import { studyImageFor } from '../data/editorialImages';
+import { NoteEditor } from './NoteEditor';
 
 export function TopicStudyView({
   topic,
@@ -48,15 +50,18 @@ export function TopicStudyView({
 }) {
   const [fontScale, setFontScale] = useState<'base' | 'lg' | 'xl'>('lg');
   const [notes, setNotes] = useState(topic.progress.notes || '');
+  const [savedNotes, setSavedNotes] = useState(topic.progress.notes || '');
   const [savingNotes, setSavingNotes] = useState(false);
   const [notesSavedMsg, setNotesSavedMsg] = useState(false);
+  const [notesError, setNotesError] = useState('');
 
   useEffect(() => {
     setNotes(topic.progress.notes || '');
+    setSavedNotes(topic.progress.notes || '');
+    setNotesError('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [topic.slug]);
 
-  const accent = getAccentClasses(topic.accentColor);
   const standaloneAttachments = topic.attachments.filter((a) => !a.sourceId);
 
   const proseSizeClass =
@@ -80,11 +85,30 @@ export function TopicStudyView({
 
   async function saveNotes() {
     setSavingNotes(true);
+    setNotesError('');
     try {
       await api.updateProgress(topic.slug, { notes });
+      setSavedNotes(notes);
       setNotesSavedMsg(true);
       onProgressChanged();
       setTimeout(() => setNotesSavedMsg(false), 2500);
+    } catch {
+      setNotesError('Could not save this note. Please try again.');
+    } finally {
+      setSavingNotes(false);
+    }
+  }
+
+  async function deleteNotes() {
+    setSavingNotes(true);
+    setNotesError('');
+    try {
+      await api.updateProgress(topic.slug, { notes: '' });
+      setNotes('');
+      setSavedNotes('');
+      onProgressChanged();
+    } catch {
+      setNotesError('Could not delete this note. Please try again.');
     } finally {
       setSavingNotes(false);
     }
@@ -171,58 +195,19 @@ export function TopicStudyView({
         </div>
       </div>
 
-      {/* Title Card */}
-      <header className="min-w-0 rounded-3xl bg-[#fffdf9] dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-5 sm:p-10 space-y-4 shadow-xs">
-        <div className="flex flex-wrap items-center gap-2.5 text-xs">
-          <span className={`px-3 py-1 rounded-full font-semibold ${accent.badge}`}>
-            {topic.disciplineName} • {topic.disciplineGreek}
-          </span>
-          <span className="px-2.5 py-1 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-medium">
-            {topic.difficulty}
-          </span>
-          {topic.era && (
-            <span className="px-2.5 py-1 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400">
-              {topic.era}
-            </span>
-          )}
-          <span className="inline-flex items-center gap-1 text-stone-500">
-            <Clock className="w-3.5 h-3.5" /> {topic.readingMinutes} min study
-          </span>
-          {topic.quizSummary.bestPercentage != null && (
-            <span className="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 font-semibold">
-              Quiz Mastery: {Math.round(topic.quizSummary.bestPercentage)}%
-            </span>
-          )}
+      <EditorialHero eyebrow={`${topic.disciplineName} · ${topic.disciplineGreek} · ${topic.difficulty}`}
+        title={topic.title} description={`${topic.subtitle}. ${topic.summary}`}
+        image={studyImageFor(topic.disciplineSlug).src} imageAlt={studyImageFor(topic.disciplineSlug).alt}
+        className="study-editorial-hero">
+        <div className="study-hero-meta"><span><Clock className="w-3.5 h-3.5" /> {topic.readingMinutes} min study</span>
+          {topic.era && <span>{topic.era}</span>}
+          {topic.quizSummary.bestPercentage != null && <span>Quiz mastery {Math.round(topic.quizSummary.bestPercentage)}%</span>}
         </div>
-
-        <h1 className="break-words font-display text-3xl sm:text-5xl font-bold text-stone-900 dark:text-stone-50 leading-tight">
-          {topic.title}
-        </h1>
-        <p className="break-words font-reading italic text-xl text-amber-900/90 dark:text-amber-300/90">
-          {topic.subtitle}
-        </p>
-        <p className="break-words font-reading text-lg text-stone-700 dark:text-stone-300 leading-relaxed pt-1">
-          {topic.summary}
-        </p>
-
-        {topic.scriptureRefs.length > 0 && (
-          <div className="pt-3 border-t border-stone-200/70 dark:border-stone-800 flex flex-wrap items-center gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-stone-500 inline-flex items-center gap-1">
-              <BookOpen className="w-3.5 h-3.5" /> Key Scripture Loci:
-            </span>
-            {topic.scriptureRefs.map((ref) => (
-              <Link
-                key={ref}
-                to={scriptureUrl(ref)}
-                className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-stone-800 dark:hover:bg-stone-700 text-amber-950 dark:text-amber-200 text-xs font-medium border border-amber-900/15 inline-flex items-center gap-1 transition"
-                title="Read in the Bible room"
-              >
-                {ref}
-              </Link>
-            ))}
-          </div>
-        )}
-      </header>
+        {topic.scriptureRefs.length > 0 && <div className="study-hero-scriptures">
+          <span><BookOpen className="w-3.5 h-3.5" /> Key passages</span>
+          {topic.scriptureRefs.map((ref) => <Link key={ref} to={scriptureUrl(ref)} title="Read in the Bible room">{ref}</Link>)}
+        </div>}
+      </EditorialHero>
 
       {(['church-history', 'soteriology', 'hermeneutics', 'eschatology'].includes(topic.disciplineSlug)) && (
         <aside className="ref-inset flex flex-wrap items-center justify-between gap-3">
@@ -569,37 +554,27 @@ export function TopicStudyView({
             </div>
           )}
 
-          {/* Personal Study Notes (Persisted in SQLite) */}
-          <div className="rounded-2xl bg-[#fffdf9] dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="font-display text-xl font-bold text-stone-900 dark:text-stone-100">
-                Personal Marginalia & Notes
-              </h3>
-              {notesSavedMsg && (
-                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-                  Saved!
-                </span>
-              )}
+          {/* Study notes are also editable from the notebook page. */}
+          <section className="min-w-0 space-y-3" aria-labelledby="study-note-heading">
+            <div className="flex flex-wrap items-end justify-between gap-2">
+              <div>
+                <h3 id="study-note-heading" className="font-display text-xl font-bold text-stone-900 dark:text-stone-100">Study notebook</h3>
+                <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">Keep one living note for this topic. Format it here or continue in your notebook.</p>
+              </div>
+              <Link to={`/notebook/${encodeURIComponent(topic.slug)}`} className="text-xs font-semibold text-amber-900 underline-offset-4 hover:underline dark:text-amber-300">Open notebook</Link>
             </div>
-            <p className="text-xs text-stone-500 dark:text-stone-400">
-              Record reflections, Scripture cross-references, or seminar questions for this topic.
-            </p>
-            <textarea
-              rows={6}
+            <NoteEditor
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Write your theological reflections here..."
-              className="w-full p-3 rounded-xl bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-sm font-reading leading-relaxed"
+              onChange={(value) => { setNotes(value); setNotesSavedMsg(false); setNotesError(''); }}
+              onSave={saveNotes}
+              onDelete={savedNotes.trim() ? deleteNotes : undefined}
+              dirty={notes !== savedNotes}
+              saving={savingNotes}
+              saved={notesSavedMsg || (!!savedNotes.trim() && notes === savedNotes)}
+              error={notesError}
+              compact
             />
-            <button
-              onClick={saveNotes}
-              disabled={savingNotes}
-              className="w-full py-2 px-4 rounded-xl bg-stone-900 hover:bg-stone-800 dark:bg-amber-600 dark:hover:bg-amber-500 text-white text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition"
-            >
-              <Save className="w-3.5 h-3.5" />
-              {savingNotes ? 'Saving Notes...' : 'Save Study Notes'}
-            </button>
-          </div>
+          </section>
 
           {/* Topic Quiz Callout */}
           {topic.quizSummary.questionCount > 0 && (

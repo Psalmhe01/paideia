@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { Router } from 'express';
-import { bibleEditions, bookTitles, catholicOldTestament, newTestament } from '../shared/reference.js';
+import { bibleBookCodeAliases, bibleEditions, bookTitles, catholicOldTestament, newTestament } from '../shared/reference.js';
 import type { BibleBook, BibleEdition, BibleHit, BibleVerse, StrongEntry } from '../shared/reference.js';
 
 function readDataset<T>(name: string): T {
@@ -19,7 +19,8 @@ const bibles = new Map<BibleEdition, { text: BibleText; books: BibleBook[]; inde
 function getBible(edition: BibleEdition) {
   const cached = bibles.get(edition);
   if (cached) return cached;
-  const text = readDataset<BibleText>(edition);
+  const sourceText = readDataset<BibleText>(edition);
+  const text = Object.fromEntries(Object.entries(sourceText).map(([code, chapters]) => [bibleBookCodeAliases[code] ?? code, chapters])) as BibleText;
   const codes = edition === 'webc' ? [...catholicOldTestament, ...newTestament] : Object.keys(text);
   const books: BibleBook[] = codes.map((code) => ({
     code, title: bookTitles[code] ?? code, chapters: Object.keys(text[code]),
@@ -75,7 +76,8 @@ referenceRouter.get('/bible/:edition/search', (req, res) => {
 
 referenceRouter.get('/bible/:edition/:book/:chapter', (req, res) => {
   const edition = bibleEditions.find(({ id }) => id === req.params.edition);
-  const code = req.params.book.toUpperCase();
+  const requestedCode = req.params.book.toUpperCase();
+  const code = bibleBookCodeAliases[requestedCode] ?? requestedCode;
   const chapter = req.params.chapter;
   if (!edition || !Object.hasOwn(bookTitles, code) || !/^\d{1,3}$/.test(chapter)) {
     return res.status(404).json({ error: 'Bible passage not found.' });

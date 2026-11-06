@@ -31,12 +31,12 @@ import { DashboardView } from './components/DashboardView';
 import { CatalogView } from './components/CatalogView';
 import { SourcesVaultView } from './components/SourcesVaultView';
 import { QuizCenterView, type InitialQuizRequest } from './components/QuizCenterView';
-import { NotebookView } from './components/LexiconAndNotebookViews';
 import { AddAttachmentModal, AddSourceModal } from './components/ResourceModals';
 import { GlobalSearchModal } from './components/GlobalSearchModal';
 import { DisciplineIcon } from './components/DisciplineIcon';
 
 const TopicStudyView = lazy(() => import('./components/TopicStudyView').then((module) => ({ default: module.TopicStudyView })));
+const NotebookView = lazy(() => import('./components/LexiconAndNotebookViews').then((module) => ({ default: module.NotebookView })));
 const AttachmentModal = lazy(() => import('./components/AttachmentModal').then((module) => ({ default: module.AttachmentModal })));
 const BibleView = lazy(() => import('./components/ReferenceViews').then((module) => ({ default: module.BibleView })));
 const ReferenceLexicon = lazy(() => import('./components/ReferenceViews').then((module) => ({ default: module.ReferenceLexicon })));
@@ -115,6 +115,38 @@ export default function App() {
   }, [pathname]);
 
   useEffect(() => {
+    const content = document.getElementById('main-content');
+    if (!content) return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const observed = new Set<Element>();
+    const revealTargets = '.ref-page > *, .ref-card, .ref-inset, .study-topic-card, .explore-image-card, .featured-study-card, .book-card, .path-card, .home-section, .history-timeline__card';
+    const observer = !reduceMotion && 'IntersectionObserver' in window
+      ? new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-revealed');
+          observer?.unobserve(entry.target);
+        });
+      }, { threshold: 0.08, rootMargin: '0px 0px -36px 0px' })
+      : undefined;
+    const scan = () => {
+      content.querySelectorAll(revealTargets).forEach((element) => {
+        if (observed.has(element)) return;
+        observed.add(element);
+        element.classList.add('scroll-reveal');
+        const siblings = element.parentElement ? Array.from(element.parentElement.children) : [];
+        (element as HTMLElement).style.setProperty('--reveal-delay', `${Math.min(Math.max(0, siblings.indexOf(element)), 5) * 55}ms`);
+        if (observer) observer.observe(element);
+        else element.classList.add('is-revealed');
+      });
+    };
+    scan();
+    const mutations = new MutationObserver(scan);
+    mutations.observe(content, { childList: true, subtree: true });
+    return () => { mutations.disconnect(); observer?.disconnect(); };
+  }, [pathname]);
+
+  useEffect(() => {
     if (!topicSlug) return;
     let current = true;
     setFailedTopic(undefined);
@@ -186,17 +218,17 @@ export default function App() {
   }, [pathname, locationKey, quizTopic, quizWing]);
 
   const navItems = [
-    { to: '/', label: 'Sanctuary Overview', icon: Library },
-    { to: '/study', label: 'Study Curriculum', icon: BookOpen },
-    { to: '/paths', label: 'Guided Study Paths', icon: RouteIcon },
-    { to: '/quizzes', label: 'Quiz Gymnasium', icon: GraduationCap },
-    { to: '/notebook', label: 'Study Notebook', icon: StickyNote },
-    { to: '/bible', label: 'Bible Reader', icon: BookOpenText },
-    { to: '/lexicon', label: 'Theological Lexicon', icon: Languages },
-    { to: '/atlas', label: 'History & Concept Atlas', icon: ChartNoAxesCombined },
-    { to: '/traditions', label: 'Christian Traditions', icon: GitFork },
-    { to: '/books', label: 'Christian Books', icon: BookCopy },
-    { to: '/sources', label: 'Sources & Attachments', icon: Globe },
+    { to: '/', label: 'Overview', icon: Library },
+    { to: '/study', label: 'Study curriculum', icon: BookOpen },
+    { to: '/paths', label: 'Guided study paths', icon: RouteIcon },
+    { to: '/quizzes', label: 'Quizzes', icon: GraduationCap },
+    { to: '/notebook', label: 'My notebook', icon: StickyNote },
+    { to: '/bible', label: 'Bible', icon: BookOpenText },
+    { to: '/lexicon', label: 'Lexicon', icon: Languages },
+    { to: '/atlas', label: 'History & concepts', icon: ChartNoAxesCombined },
+    { to: '/traditions', label: 'Christian traditions', icon: GitFork },
+    { to: '/books', label: 'Books', icon: BookCopy },
+    { to: '/sources', label: 'Sources & attachments', icon: Globe },
   ];
 
   function renderNav(items: typeof navItems) {
@@ -206,10 +238,7 @@ export default function App() {
         to={to}
         end={to === '/'}
         onClick={() => setMobileMenuOpen(false)}
-        className={({ isActive }) => 'flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition ' +
-          (isActive
-            ? 'bg-amber-900 text-white dark:bg-amber-800'
-            : 'text-stone-700 dark:text-stone-300 hover:bg-stone-200/60 dark:hover:bg-stone-900')}
+        className={({ isActive }) => 'site-menu-link ' + (isActive ? 'is-active' : '')}
       >
         <Icon className="w-4 h-4" aria-hidden="true" />
         {label}
@@ -218,153 +247,57 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen min-w-0 flex overflow-x-clip bg-[#faf7f2] dark:bg-[#12100e] text-stone-900 dark:text-stone-100">
-      {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-72 shrink-0 flex-col border-r border-stone-200/90 dark:border-stone-800 bg-[#f5efe4]/80 dark:bg-stone-950/80 sticky top-0 h-screen">
-        {/* Brand Header */}
-        <Link to="/" className="px-6 py-6 border-b border-stone-200/80 dark:border-stone-800">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-800 to-stone-900 text-amber-100 flex items-center justify-center font-display text-2xl font-bold shadow-sm">
-              Π
-            </div>
-            <div>
-              <span className="font-display text-2xl font-bold tracking-tight block leading-none">
-                Paideia
-              </span>
-              <span className="text-[11px] text-amber-900/80 dark:text-amber-400/80 font-medium">
-                Theological Library • παιδεία
-              </span>
-            </div>
-          </div>
-        </Link>
-
-        {/* Quick Search Trigger */}
-        <div className="px-4 pt-4">
-          <button
-            onClick={() => setSearchModalOpen(true)}
-            className="w-full px-3.5 py-2 rounded-xl bg-white/90 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-500 flex items-center justify-between hover:border-amber-700/50 transition"
-          >
-            <span className="inline-flex items-center gap-2">
-              <Search className="w-3.5 h-3.5 text-amber-800 dark:text-amber-400" />
-              Search Library...
-            </span>
-            <kbd className="px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-[10px] font-mono">
-              ⌘K
-            </kbd>
-          </button>
-        </div>
-
-        {/* Main Navigation */}
-        <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
-          <div className="space-y-1">
-            <span className="px-3 text-[10px] font-bold uppercase tracking-widest text-stone-400">
-              Reading Rooms
-            </span>
-            {renderNav(navItems.slice(0, 5))}
-          </div>
-          <div className="space-y-1">
-            <span className="px-3 text-[10px] font-bold uppercase tracking-widest text-stone-500">Reference rooms</span>
-            {renderNav(navItems.slice(5))}
-          </div>
-
-          {/* Wings Quick Jump */}
-          <div className="space-y-1">
-            <span className="px-3 text-[10px] font-bold uppercase tracking-widest text-stone-400">
-              Theological Wings
-            </span>
-            {disciplines.map((d) => (
-              <button
-                key={d.slug}
-                onClick={() => navigateToDiscipline(d.slug)}
-                className={`w-full flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl text-xs transition ${
-                  pathname === '/study' && selectedDiscipline === d.slug
-                    ? 'bg-stone-200 dark:bg-stone-800 font-semibold text-amber-900 dark:text-amber-300'
-                    : 'text-stone-600 dark:text-stone-400 hover:bg-stone-200/50 dark:hover:bg-stone-900'
-                }`}
-              >
-                <span className="inline-flex items-center gap-2.5 truncate">
-                  <DisciplineIcon name={d.icon} className="w-3.5 h-3.5 shrink-0 opacity-80" />
-                  <span className="truncate">{d.name}</span>
-                </span>
-                <span className="text-[10px] text-stone-400">{d.topicCount}</span>
-              </button>
-            ))}
-          </div>
-        </nav>
-
-        {/* Bottom Theme Switcher */}
-        <div className="p-4 border-t border-stone-200/80 dark:border-stone-800 flex items-center justify-between text-xs">
-          <span className="text-stone-500">
-            {darkMode ? 'Scriptorium Night' : 'Parchment Day'}
-          </span>
-          <button
-            onClick={() => setDarkMode((d) => !d)}
-            className="p-2 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-amber-300 hover:border-amber-700 transition"
-            aria-label="Toggle reading theme"
-          >
-            {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </button>
-        </div>
-      </aside>
-
-      {/* Main Content Area */}
-      <div className="flex-1 min-w-0 flex flex-col pt-14 lg:pt-0">
-        {/* Mobile Top Header */}
-        <header className="lg:hidden fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between px-4 bg-[#f5efe4]/95 dark:bg-stone-950/95 backdrop-blur-xs border-b border-stone-200 dark:border-stone-800">
-          <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-amber-900 text-amber-100 flex items-center justify-center font-display text-lg font-bold">
-              Π
-            </div>
-            <span className="font-display text-xl font-bold">Paideia</span>
+    <div className="min-h-screen min-w-0 flex flex-col overflow-x-clip bg-[#faf7f2] dark:bg-[#12100e] text-stone-900 dark:text-stone-100">
+      <header className="site-header sticky top-0 z-40">
+        <div className="site-header__inner">
+          <Link to="/" className="site-brand" aria-label="Paideia overview">
+            <span className="site-brand__mark" aria-hidden="true">Π</span>
+            <span className="site-brand__copy"><strong>Paideia</strong><small>Learn the Christian tradition</small></span>
           </Link>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setSearchModalOpen(true)}
-              className="p-2 rounded-lg text-stone-600 dark:text-stone-300"
-              aria-label="Search"
-            >
-              <Search className="w-5 h-5" />
+          <nav className="site-primary-nav" aria-label="Main navigation">
+            {[
+              { to: '/study', label: 'Study' },
+              { to: '/bible', label: 'Scripture' },
+              { to: '/atlas', label: 'History & ideas' },
+              { to: '/traditions', label: 'Traditions' },
+            ].map(({ to, label }) => <NavLink key={to} to={to} className={({ isActive }) => isActive ? 'is-active' : ''}>{label}</NavLink>)}
+          </nav>
+          <div className="site-header__actions">
+            <button onClick={() => setSearchModalOpen(true)} className="site-icon-button" aria-label="Search the library"><Search size={19} /></button>
+            <button onClick={() => setDarkMode((d) => !d)} className="site-icon-button" aria-label="Toggle reading theme">
+              {darkMode ? <Sun size={19} /> : <Moon size={19} />}
             </button>
             <button
-              onClick={() => setDarkMode((d) => !d)}
-              className="p-2 rounded-lg text-stone-600 dark:text-amber-300"
-              aria-label="Toggle theme"
-            >
-              {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
-            <button
-              onClick={() => setMobileMenuOpen((o) => !o)}
-              className="p-2 rounded-lg text-stone-700 dark:text-stone-200"
+              onClick={() => setMobileMenuOpen((open) => !open)}
+              className="site-menu-toggle"
               aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={mobileMenuOpen}
-              aria-controls="mobile-navigation"
+              aria-controls="site-navigation"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              <span>{mobileMenuOpen ? 'Close' : 'Explore'}</span>
+              {mobileMenuOpen ? <X size={19} /> : <Menu size={19} />}
             </button>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {mobileMenuOpen && (
-          <>
-            <button
-              type="button"
-              className="lg:hidden fixed inset-0 z-40 bg-stone-950/30"
-              aria-label="Close navigation menu"
-              onClick={() => setMobileMenuOpen(false)}
-            />
-            <nav
-              id="mobile-navigation"
-              aria-label="Mobile navigation"
-              className="lg:hidden fixed inset-x-0 top-14 z-50 grid grid-cols-2 gap-x-2 gap-y-1 overflow-y-auto border-b border-stone-200 bg-[#f5efe4] px-4 py-3 shadow-xl dark:border-stone-800 dark:bg-stone-950"
-              style={{ maxHeight: 'calc(100dvh - 3.5rem)' }}
-            >
-              {renderNav(navItems)}
-            </nav>
-          </>
-        )}
+      {mobileMenuOpen && <>
+        <button type="button" className="site-menu-backdrop" aria-label="Close navigation menu" onClick={() => setMobileMenuOpen(false)} />
+        <nav id="site-navigation" aria-label="Explore Paideia" className="site-menu-panel">
+          <div className="site-menu-panel__inner">
+            <div className="site-menu-intro"><span>Explore Paideia</span><p>Read, compare, and follow ideas through Christian history.</p></div>
+            <div className="site-menu-grid">{renderNav(navItems)}</div>
+            {disciplines.length > 0 && <div className="site-discipline-links">
+              <span className="site-menu-label">Study by discipline</span>
+              <div>{disciplines.map((discipline) => <button key={discipline.slug} onClick={() => { setMobileMenuOpen(false); navigateToDiscipline(discipline.slug); }}>
+                <DisciplineIcon name={discipline.icon} className="w-4 h-4" />{discipline.name}<small>{discipline.topicCount}</small>
+              </button>)}</div>
+            </div>}
+          </div>
+        </nav>
+      </>}
 
-        <main id="main-content" className="flex-1 min-w-0 max-w-6xl w-full mx-auto px-4 sm:px-8 pt-6 sm:pt-8">
+      <main id="main-content" className="flex-1 min-w-0 w-full max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-10 pt-5 sm:pt-8">
           {coreError && <div role="alert" className="ref-card mb-4">The study server could not be reached. <button className="ref-link" onClick={refreshCoreData}>Try again</button></div>}
           <Suspense fallback={<p role="status">Opening the reading room…</p>}>
           <Routes>
@@ -450,7 +383,7 @@ export default function App() {
               onQuizCompleted={refreshCoreData}
             />
           } />
-          <Route path="/notebook" element={<NotebookView stats={stats} onOpenTopic={openTopic} />} />
+          <Route path="/notebook/:slug?" element={<NotebookView stats={stats} topics={allTopics} onOpenTopic={openTopic} onDataChanged={refreshCoreData} />} />
           <Route path="/bible/:edition?/:book?/:chapter?" element={<BibleView />} />
           <Route path="/lexicon/:entry?" element={<ReferenceLexicon onOpenTopic={openTopic} />} />
           <Route path="/atlas/:chart?" element={<AtlasView />} />
@@ -460,8 +393,23 @@ export default function App() {
           <Route path="*" element={<div className="ref-card"><h1 className="ref-heading">Room not found</h1><Link className="ref-link" to="/">Return to the overview</Link></div>} />
           </Routes>
           </Suspense>
-        </main>
-      </div>
+      </main>
+
+      <footer className="site-footer">
+        <div className="site-footer__inner">
+          <Link to="/" className="site-brand"><span className="site-brand__mark" aria-hidden="true">Π</span><span className="site-brand__copy"><strong>Paideia</strong><small>Study with care.</small></span></Link>
+          <p>A thoughtful library for Scripture, theology, and the history of Christian ideas.</p>
+          <nav aria-label="Footer navigation"><Link to="/study">Study</Link><Link to="/bible">Bible</Link><Link to="/atlas">Atlas</Link><Link to="/sources">Sources</Link></nav>
+        </div>
+        <div className="site-footer__bottom">
+          <span>Paideia · παιδεία</span>
+          <div className="site-footer__credits">
+            <a href="https://unsplash.com" target="_blank" rel="noreferrer">Photography via Unsplash</a>
+            <a href="https://digmanclass.universiteitleiden.nl/glossary/" target="_blank" rel="noreferrer">Manuscript image: Leiden University</a>
+            <a href="https://commons.wikimedia.org/wiki/File:Atelier-d%27impression-par-Jan-Van-der-Straet-XVIe.jpg" target="_blank" rel="noreferrer">Printing workshop: Codex · CC BY-SA 3.0</a>
+          </div>
+        </div>
+      </footer>
 
       {/* Modals */}
       {previewAttachment && (

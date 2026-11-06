@@ -1,9 +1,12 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { ArrowLeft, ArrowRight, BookOpen, Bookmark, Search } from 'lucide-react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { bibleEditions, bibleUrl, bookTitles, scriptureUrl } from '../../shared/reference';
+import { bibleBookCodeAliases, bibleEditions, bibleUrl, bookTitles, scriptureUrl } from '../../shared/reference';
 import type { BibleBook, BibleHit, BibleVerse, StrongEntry } from '../../shared/reference';
 import { LexiconView } from './LexiconAndNotebookViews';
+import { EditorialHero } from './EditorialHero';
+import { editorialImages } from '../data/editorialImages';
+import { SearchFilterPanel } from './SearchFilterPanel';
 
 function useReference<T>(path: string | null) {
   const [result, setResult] = useState<{ path: string; data?: T; error?: string }>();
@@ -43,7 +46,8 @@ export function BibleView() {
   const navigate = useNavigate();
   const edition = bibleEditions.find(({ id }) => id === (editionParam ?? 'webp'));
   const id = edition?.id ?? 'webp';
-  const bookCode = (bookParam ?? 'jhn').toUpperCase();
+  const requestedBookCode = (bookParam ?? 'jhn').toUpperCase();
+  const bookCode = bibleBookCodeAliases[requestedBookCode] ?? requestedBookCode;
   const chapter = chapterParam ?? '1';
   const q = params.get('q') ?? '';
   const bookFilter = params.get('in') ?? '';
@@ -87,7 +91,7 @@ export function BibleView() {
       ? ({ EST: 'ESG', DAN: 'DAG' }[bookCode] ?? bookCode)
       : ({ ESG: 'EST', DAG: 'DAN' }[bookCode] ?? bookCode);
     const catholicOnly = ['TOB', 'JDT', '1MA', '2MA', 'WIS', 'SIR', 'BAR'];
-    const nextBook = next === 'webp' && catholicOnly.includes(mapped) ? 'GEN' : mapped;
+    const nextBook = next !== 'webc' && catholicOnly.includes(mapped) ? 'GEN' : mapped;
     navigate(bibleUrl(next, nextBook, nextBook === bookCode ? chapter : '1') + (q ? '?' + new URLSearchParams({ q }) : ''));
   }
 
@@ -114,16 +118,14 @@ export function BibleView() {
 
   return (
     <div className="ref-page">
-      <header>
-        <p className="ref-kicker">Scripture room</p>
-        <h1 className="ref-title">Bible Reader</h1>
-        <p className="ref-deck">Read every chapter, search the text, and save verses in this browser.</p>
-      </header>
-      <div className="ref-card space-y-4">
-        <div className="grid gap-3 sm:grid-cols-3">
+      <EditorialHero eyebrow="Scripture room" title="The Bible"
+        description="Read, search, and save passages as you study."
+        image={editorialImages.scripture.src} imageAlt={editorialImages.scripture.alt} />
+      <div className="search-results-layout">
+        <SearchFilterPanel title="Bible reader">
           <label className="ref-field">Edition
             <select aria-label="Edition" value={id} onChange={(event) => changeEdition(event.target.value as typeof id)}>
-              {bibleEditions.map((item) => <option key={item.id} value={item.id}>{item.canon}</option>)}
+              {bibleEditions.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.canon}</option>)}
             </select>
           </label>
           <label className="ref-field">Book
@@ -141,25 +143,24 @@ export function BibleView() {
               {book?.chapters.map((number) => <option key={number} value={number}>{number}</option>)}
             </select>
           </label>
-        </div>
-        <form className="grid sm:grid-cols-[1fr_12rem_auto] items-end gap-3" onSubmit={submitSearch}>
-          <label className="ref-field">Find a phrase or passage
-            <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="e.g. John 3:16 or living water" />
-          </label>
-          <label className="ref-field">Search in
-            <select value={scope} onChange={(event) => setScope(event.target.value)}>
-              <option value="">Entire Bible</option>
-              {books?.data?.map((item) => <option key={item.code} value={item.code}>{item.title}</option>)}
-            </select>
-          </label>
-          <button className="ref-button ref-button-primary" type="submit"><Search size={16} /> Search</button>
-        </form>
-        <details className="text-sm">
-          <summary className="cursor-pointer font-semibold">Saved verses ({saved.length})</summary>
-          {saved.length ? <ul className="mt-2 space-y-2">{saved.map((item) => <li key={item.url}><Link className="ref-link" to={item.url}>{item.label}</Link></li>)}</ul>
-            : <p className="mt-2 ref-muted">Use the bookmark icon beside a verse to save it here.</p>}
-        </details>
-      </div>
+          <form className="grid gap-3 border-t border-stone-200 pt-3 dark:border-stone-700" onSubmit={submitSearch}>
+            <label className="ref-field">Find a phrase or passage
+              <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="John 3:16 or living water" />
+            </label>
+            <label className="ref-field">Search in
+              <select value={scope} onChange={(event) => setScope(event.target.value)}>
+                <option value="">Entire Bible</option>{books?.data?.map((item) => <option key={item.code} value={item.code}>{item.title}</option>)}
+              </select>
+            </label>
+            <button className="ref-button ref-button-primary justify-center" type="submit"><Search size={16} /> Search</button>
+          </form>
+          <details className="border-t border-stone-200 pt-3 text-sm dark:border-stone-700">
+            <summary className="cursor-pointer font-semibold">Saved verses ({saved.length})</summary>
+            {saved.length ? <ul className="mt-2 space-y-2">{saved.map((item) => <li key={item.url}><Link className="ref-link" to={item.url}>{item.label}</Link></li>)}</ul>
+              : <p className="mt-2 ref-muted">Use the bookmark icon beside a verse to save it here.</p>}
+          </details>
+        </SearchFilterPanel>
+        <div className="search-results-layout__results">
       {books?.error && <p role="alert">{books.error}</p>}
       {q ? (
         <section className="ref-card space-y-3" aria-label="Verse search results">
@@ -208,7 +209,9 @@ export function BibleView() {
           </nav>
         </article>
       )}
-      <p className="text-sm ref-muted"><a className="ref-link" href={edition.source}>{edition.name} · {edition.canon}</a>. Public-domain verse text from eBible.org.</p>
+      <p className="text-sm ref-muted">Verse text supplied by <a className="ref-link" href={edition.source}>{edition.name} · {edition.canon}</a> from eBible.org. See the edition source for its text and terms.</p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -243,11 +246,9 @@ export function ReferenceLexicon({ onOpenTopic }: { onOpenTopic: (slug: string) 
 
   return (
     <div className="ref-page">
-      <header>
-        <p className="ref-kicker">Language room</p>
-        <h1 className="ref-title">Lexicon</h1>
-        <p className="ref-deck">Explore biblical Greek, Hebrew, and Aramaic headwords, or review the vocabulary of the curriculum.</p>
-      </header>
+      {!glossary && <EditorialHero eyebrow="Language room" title="The lexicon"
+        description="Explore biblical Greek, Hebrew, and Aramaic, or follow a theological term through its use."
+        image={editorialImages.manuscript.src} imageAlt={editorialImages.manuscript.alt} />}
       <nav className="ref-tabs" aria-label="Lexicon collections">
         <Link className="ref-button" aria-current={!glossary ? 'page' : undefined} to="/lexicon">Strong’s dictionaries</Link>
         <Link className="ref-button" aria-current={glossary ? 'page' : undefined} to="/lexicon?view=glossary">Theological glossary</Link>
@@ -269,41 +270,44 @@ export function ReferenceLexicon({ onOpenTopic }: { onOpenTopic: (slug: string) 
             ))}
           </div>}
         </article>
-      ) : <>
-        <form className="ref-card grid gap-3 sm:grid-cols-[1fr_12rem_auto] items-end" onSubmit={(event) => { event.preventDefault(); updateSearch(draft, language); }}>
-          <label className="ref-field">Headword, Strong’s number, or definition
-            <input type="search" value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="e.g. G3056, λόγος, logos" />
-          </label>
-          <label className="ref-field">Language
-            <select value={language} onChange={(event) => updateSearch(draft, event.target.value)}>
-              <option value="">All languages</option>
-              <option>Greek</option><option>Hebrew</option><option>Aramaic</option>
-            </select>
-          </label>
-          <button className="ref-button ref-button-primary" type="submit"><Search size={16} /> Find entries</button>
-        </form>
-        {!listing && <p role="status">Opening the dictionaries…</p>}
-        {listing?.error && <p role="alert">{listing.error}</p>}
-        {listing?.data && <>
-          <p className="ref-muted text-sm" role="status">{listing.data.total.toLocaleString()} results · {listing.data.corpusSize.toLocaleString()} entries in the dictionaries</p>
-          {listing.data.entries.length === 0 && <p className="ref-card">No entries on this page. Try another spelling or a Strong’s number.</p>}
-          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
-            {listing.data.entries.map((entry) => (
-              <Link key={entry.id} to={'/lexicon/' + entry.id + (params.size ? '?' + params : '')} className="ref-card ref-interactive space-y-2">
-                <span className="ref-kicker">{entry.id} · {entry.language}</span>
-                <h2 className="ref-heading"><Lemma entry={entry} /></h2>
-                <p className="text-sm ref-muted">{entry.transliteration}</p>
-                <p className="font-reading text-lg line-clamp-3">{entry.definition || entry.renderings}</p>
-              </Link>
-            ))}
-          </div>
-          {listing.data.pages > 1 && <nav aria-label="Lexicon pages" className="flex items-center justify-center gap-3">
-            <button type="button" className="ref-button" disabled={listing.data.page <= 1} onClick={() => setParams({ ...Object.fromEntries(params), page: String(listing.data!.page - 1) })}><ArrowLeft size={16} /> Previous</button>
-            <span className="text-sm">{listing.data.page} / {listing.data.pages}</span>
-            <button type="button" className="ref-button" disabled={listing.data.page >= listing.data.pages} onClick={() => setParams({ ...Object.fromEntries(params), page: String(listing.data!.page + 1) })}>Next <ArrowRight size={16} /></button>
-          </nav>}
-        </>}
-      </>}
+      ) : <div className="search-results-layout">
+        <SearchFilterPanel title="Search the lexicon">
+          <form className="grid gap-3" onSubmit={(event) => { event.preventDefault(); updateSearch(draft, language); }}>
+            <label className="ref-field">Headword or definition
+              <input type="search" value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="G3056, λόγος, logos…" />
+            </label>
+            <label className="ref-field">Language
+              <select value={language} onChange={(event) => updateSearch(draft, event.target.value)}>
+                <option value="">All languages</option><option>Greek</option><option>Hebrew</option><option>Aramaic</option>
+              </select>
+            </label>
+            <button className="ref-button ref-button-primary justify-center" type="submit"><Search size={16} /> Find entries</button>
+          </form>
+        </SearchFilterPanel>
+        <div className="search-results-layout__results">
+          {!listing && <p role="status">Opening the dictionaries…</p>}
+          {listing?.error && <p role="alert">{listing.error}</p>}
+          {listing?.data && <>
+            <p className="ref-muted text-sm" role="status">{listing.data.total.toLocaleString()} results · {listing.data.corpusSize.toLocaleString()} entries in the dictionaries</p>
+            {listing.data.entries.length === 0 && <p className="ref-card">No entries on this page. Try another spelling or a Strong’s number.</p>}
+            <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
+              {listing.data.entries.map((entry) => (
+                <Link key={entry.id} to={'/lexicon/' + entry.id + (params.size ? '?' + params : '')} className="ref-card ref-interactive space-y-2">
+                  <span className="ref-kicker">{entry.id} · {entry.language}</span>
+                  <h2 className="ref-heading"><Lemma entry={entry} /></h2>
+                  <p className="text-sm ref-muted">{entry.transliteration}</p>
+                  <p className="font-reading text-lg line-clamp-3">{entry.definition || entry.renderings}</p>
+                </Link>
+              ))}
+            </div>
+            {listing.data.pages > 1 && <nav aria-label="Lexicon pages" className="flex items-center justify-center gap-3">
+              <button type="button" className="ref-button" disabled={listing.data.page <= 1} onClick={() => setParams({ ...Object.fromEntries(params), page: String(listing.data!.page - 1) })}><ArrowLeft size={16} /> Previous</button>
+              <span className="text-sm">{listing.data.page} / {listing.data.pages}</span>
+              <button type="button" className="ref-button" disabled={listing.data.page >= listing.data.pages} onClick={() => setParams({ ...Object.fromEntries(params), page: String(listing.data!.page + 1) })}>Next <ArrowRight size={16} /></button>
+            </nav>}
+          </>}
+        </div>
+      </div>}
       {!glossary && <p className="text-sm ref-muted flex items-start gap-2"><BookOpen size={16} className="shrink-0 mt-0.5" /><span>James Strong’s dictionaries, digital edition by <a className="ref-link" href="https://github.com/openscriptures/strongs">Open Scriptures</a> (CC BY-SA). The entries include historical KJV renderings.</span></p>}
     </div>
   );

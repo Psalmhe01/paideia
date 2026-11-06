@@ -13,6 +13,9 @@ import {
 import { api } from '../api';
 import type { AttachmentItem, DisciplineSummary, SourceItem } from '../types';
 import { formatBytes } from './DisciplineIcon';
+import { EditorialHero } from './EditorialHero';
+import { editorialImages } from '../data/editorialImages';
+import { SearchFilterPanel } from './SearchFilterPanel';
 
 export function SourcesVaultView({
   disciplines,
@@ -80,126 +83,64 @@ export function SourcesVaultView({
 
   return (
     <div className="min-w-0 space-y-6 pb-12">
-      {/* Header */}
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <span className="text-xs font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-400">
-            Ad Fontes • Primary Repositories & Study Companions
-          </span>
-          <h1 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 dark:text-stone-100">
-            Online Sources & Attachments Vault
-          </h1>
-          <p className="text-sm text-stone-600 dark:text-stone-400 max-w-2xl mt-1">
-            Browse open-access patristic, conciliar, and Reformation repositories alongside downloadable PDF readers, worksheets, and uploaded attachments linked to them.
-          </p>
-        </div>
-
+      <EditorialHero
+        eyebrow="Ad fontes · return to the sources"
+        title="Primary texts & study materials"
+        description="Explore historic writings, trusted repositories, and downloadable study guides."
+        image={editorialImages.manuscript.src}
+        imageAlt={editorialImages.manuscript.alt}
+        className="page-hero--sources"
+      >
         <div className="flex flex-wrap gap-2">
           <button
             onClick={onOpenAddSource}
-            className="px-4 py-2.5 rounded-xl bg-amber-900 hover:bg-amber-800 dark:bg-amber-600 text-white text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs transition"
+            className="editorial-button editorial-button--light"
           >
             <Globe className="w-4 h-4" />
             Discover / Add Online Source
           </button>
           <button
             onClick={() => onOpenAddAttachment()}
-            className="px-4 py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 dark:bg-stone-800 text-white text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs transition"
+            className="editorial-button editorial-button--light"
           >
             <Plus className="w-4 h-4" />
             Upload Attachment
           </button>
         </div>
-      </div>
+      </EditorialHero>
 
-      {/* Mode Switcher */}
-      <div className="flex flex-wrap gap-2 border-b border-stone-200 dark:border-stone-800 pb-3">
-        <button
-          onClick={() => setActiveTab('sources')}
-          className={`min-w-0 flex-1 justify-center px-3 py-2 rounded-xl text-sm text-center font-semibold inline-flex items-center gap-2 transition ${
-            activeTab === 'sources'
-              ? 'bg-stone-900 text-white dark:bg-amber-600'
-              : 'bg-[#fffdf9] dark:bg-stone-900 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-800'
-          }`}
-        >
-          <Globe className="w-4 h-4" />
-          Online Theological Sources ({sources.length})
-        </button>
-        <button
-          onClick={() => setActiveTab('attachments')}
-          className={`min-w-0 flex-1 justify-center px-3 py-2 rounded-xl text-sm text-center font-semibold inline-flex items-center gap-2 transition ${
-            activeTab === 'attachments'
-              ? 'bg-stone-900 text-white dark:bg-amber-600'
-              : 'bg-[#fffdf9] dark:bg-stone-900 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-800'
-          }`}
-        >
-          <Paperclip className="w-4 h-4" />
-          Attachments & Study PDFs ({attachments.length})
-        </button>
-      </div>
-
-      {/* Filters */}
-      <div className="grid min-w-0 sm:grid-cols-12 gap-3 p-4 rounded-2xl bg-[#fffdf9] dark:bg-stone-900 border border-stone-200 dark:border-stone-800">
-        <div className="min-w-0 sm:col-span-5 relative">
-          <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by author, treatise, creed, or keyword..."
-            className="w-full pl-10 pr-4 py-2 rounded-xl bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-sm"
-          />
-        </div>
-
-        <div className="min-w-0 sm:col-span-4">
-          <select
-            value={disciplineFilter}
-            onChange={(e) => setDisciplineFilter(e.target.value)}
-            className="w-full px-3 py-2 rounded-xl bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-sm"
-          >
-            <option value="all">All Theological Disciplines</option>
-            {disciplines.map((d) => (
-              <option key={d.slug} value={d.slug}>
-                {d.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="min-w-0 sm:col-span-3">
+      <div className="search-results-layout">
+        <SearchFilterPanel title="Search the library">
+          <div className="grid gap-2">
+            <span className="ref-kicker">Browse collection</span>
+            <button type="button" onClick={() => setActiveTab('sources')} aria-pressed={activeTab === 'sources'} className={`ref-button inline-flex items-center justify-start gap-2 ${activeTab === 'sources' ? 'ref-button-primary' : ''}`}><Globe size={15} /> Sources ({sources.length})</button>
+            <button type="button" onClick={() => setActiveTab('attachments')} aria-pressed={activeTab === 'attachments'} className={`ref-button inline-flex items-center justify-start gap-2 ${activeTab === 'attachments' ? 'ref-button-primary' : ''}`}><Paperclip size={15} /> Attachments ({attachments.length})</button>
+          </div>
+          <label className="ref-field">Search
+            <span className="relative block"><Search className="absolute left-3 top-3" size={15} aria-hidden="true" /><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Author, text, creed…" className="pl-9 w-full" /></span>
+          </label>
+          <label className="ref-field">Discipline
+            <select value={disciplineFilter} onChange={(event) => setDisciplineFilter(event.target.value)}>
+              <option value="all">All disciplines</option>{disciplines.map((discipline) => <option key={discipline.slug} value={discipline.slug}>{discipline.name}</option>)}
+            </select>
+          </label>
           {activeTab === 'sources' ? (
-            <select
-              value={repoFilter}
-              onChange={(e) => setRepoFilter(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-sm"
-            >
-              <option value="all">All Repositories</option>
-              <option value="CCEL">CCEL</option>
-              <option value="New Advent">New Advent</option>
-              <option value="Early Christian Writings">Early Christian Writings</option>
-              <option value="Project Gutenberg">Project Gutenberg</option>
-              <option value="Open Library">Open Library</option>
-              <option value="STEP Bible / Academic">STEP Bible / Academic</option>
-              <option value="Creeds & Confessions">Creeds & Confessions</option>
-              <option value="User Contributed">User Contributed</option>
-            </select>
+            <label className="ref-field">Repository
+              <select value={repoFilter} onChange={(event) => setRepoFilter(event.target.value)}>
+                <option value="all">All repositories</option><option value="CCEL">CCEL</option><option value="New Advent">New Advent</option><option value="Early Christian Writings">Early Christian Writings</option><option value="Project Gutenberg">Project Gutenberg</option><option value="Open Library">Open Library</option><option value="STEP Bible / Academic">STEP Bible / Academic</option><option value="Creeds & Confessions">Creeds & Confessions</option><option value="User Contributed">User Contributed</option>
+              </select>
+            </label>
           ) : (
-            <select
-              value={kindFilter}
-              onChange={(e) => setKindFilter(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-sm"
-            >
-              <option value="all">All Attachment Kinds</option>
-              <option value="Study Guide PDF">Study Guide PDF</option>
-              <option value="Primary Excerpt PDF">Primary Excerpt PDF</option>
-              <option value="Diagram / Chart">Diagram / Chart</option>
-              <option value="Exegetical Worksheet">Exegetical Worksheet</option>
-              <option value="Scholarly Notes">Scholarly Notes</option>
-              <option value="Uploaded Document">Uploaded Document</option>
-            </select>
+            <label className="ref-field">Attachment type
+              <select value={kindFilter} onChange={(event) => setKindFilter(event.target.value)}>
+                <option value="all">All attachment types</option><option value="Study Guide PDF">Study Guide PDF</option><option value="Primary Excerpt PDF">Primary Excerpt PDF</option><option value="Diagram / Chart">Diagram / Chart</option><option value="Exegetical Worksheet">Exegetical Worksheet</option><option value="Scholarly Notes">Scholarly Notes</option><option value="Uploaded Document">Uploaded Document</option>
+              </select>
+            </label>
           )}
-        </div>
-      </div>
+          <button type="button" className="ref-button" onClick={() => { setSearch(''); setDisciplineFilter('all'); setRepoFilter('all'); setKindFilter('all'); }}>Reset filters</button>
+        </SearchFilterPanel>
+        <div className="search-results-layout__results">
+          <p className="ref-muted text-sm" role="status">{loading ? 'Loading collection…' : `${activeTab === 'sources' ? sources.length : attachments.length} results`}</p>
 
       {/* Content */}
       {loading ? (
@@ -395,6 +336,8 @@ export function SourcesVaultView({
           ))}
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 }

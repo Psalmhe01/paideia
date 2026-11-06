@@ -7,6 +7,10 @@ import { books } from '../data/books';
 import { axes, traditions } from '../data/traditions';
 import pathsData from '../data/studyPaths.json';
 import type { TopicSummary } from '../types';
+import { EditorialHero } from './EditorialHero';
+import { editorialImages } from '../data/editorialImages';
+import { studyImageFor } from '../data/editorialImages';
+import { SearchFilterPanel } from './SearchFilterPanel';
 
 function ReadingLink({ href, children }: { href: string; children: React.ReactNode }) {
   return href.startsWith('/') ? <Link to={href} className="ref-link">{children}</Link> :
@@ -16,13 +20,12 @@ function ReadingLink({ href, children }: { href: string; children: React.ReactNo
 export function AtlasView() {
   const { chart = 'history' } = useParams();
   const concept = conceptCharts.find(({ id }) => id === chart);
+  const atlasImage = concept ? studyImageFor(concept.id, `${concept.title} ${concept.question}`) : editorialImages.history;
   return (
     <div className="ref-page">
-      <header className="atlas-banner">
-        <p className="ref-kicker">Visual study room</p>
-        <h1 className="ref-title">History & Concept Atlas</h1>
-        <p className="ref-deck">Follow events through time and compare how theologians answer the same questions.</p>
-      </header>
+      <EditorialHero eyebrow="Visual study room" title={concept?.title ?? 'History & concept atlas'}
+        description={concept?.explanation ?? 'Follow key events through time and compare how Christian thinkers answer enduring questions.'}
+        image={atlasImage.src} imageAlt={atlasImage.alt} />
       <nav className="ref-tabs" aria-label="Atlas charts">
         <Link className="ref-button" to="/atlas" aria-current={chart === 'history' ? 'page' : undefined}>History timeline</Link>
         {conceptCharts.map((item) => <Link key={item.id} className="ref-button" aria-current={chart === item.id ? 'page' : undefined} to={'/atlas/' + item.id}>{item.title}</Link>)}
@@ -39,16 +42,6 @@ function Timeline() {
   const type = params.get('type') ?? '';
   const events = historyEvents.filter((event) => event.year >= era.start && event.year < era.end && (!type || event.type === type));
   const selected = events.find((event) => String(event.year) === params.get('year')) ?? events.find((event) => event.year === 325) ?? events[0];
-  const ticks = Array.from({ length: 5 }, (_, index) => Math.round(era.start + (era.end - era.start) * index / 4));
-  const lastInLane: number[] = [];
-  const plotted = events.map((event) => {
-    const x = 3 + 94 * (event.year - era.start) / (era.end - era.start);
-    const nextLane = lastInLane.findIndex((previous) => x - previous >= 9);
-    const lane = nextLane < 0 ? lastInLane.length : nextLane;
-    lastInLane[lane] = x;
-    return { event, x, lane };
-  });
-  const axisHeight = 32 + Math.max(1, lastInLane.length) * 31;
   const setFilter = (nextEra: string, nextType: string, year?: number) => setParams({
     era: nextEra, ...(nextType ? { type: nextType } : {}), ...(year ? { year: String(year) } : {}),
   });
@@ -66,41 +59,42 @@ function Timeline() {
       <div className="ref-tabs" aria-label="Timeline period">
         {eras.map((item) => <button className="ref-button" key={item.id} aria-pressed={era.id === item.id} onClick={() => setFilter(item.id, type)}>{item.label}</button>)}
       </div>
-      <div className="timeline-scroll" role="region" aria-label="Timeline plot" tabIndex={0}>
-        <div className="timeline-plot" style={{ height: axisHeight + 32 }}>
-          <div className="timeline-axis" style={{ top: axisHeight }} />
-          {ticks.map((year, index) => <span className="timeline-tick" key={year} style={{ left: (3 + 94 * index / 4) + '%', top: axisHeight }}><span>{year}</span></span>)}
-          {plotted.map(({ event, x, lane }) => (
-            <button type="button" key={event.year} className="timeline-point" data-type={event.type} aria-pressed={event === selected} aria-label={event.date + ' ' + event.title} title={event.title}
-              style={{ left: x + '%', top: 10 + lane * 31, '--stem': (axisHeight - (10 + lane * 31) - 26) + 'px' } as React.CSSProperties}
-              onClick={() => setFilter(era.id, type, event.year)}>{event.year}</button>
-          ))}
-        </div>
-      </div>
       <div className="flex flex-wrap gap-4 text-xs ref-muted" aria-label="Chart legend">
         {categories.map((item) => <span key={item} className="inline-flex items-center gap-2"><i className="timeline-key" data-type={item} />{item}</span>)}
-        <span>Dates shown in CE.</span>
+        <span>{events.length} milestones · Dates shown in CE</span>
       </div>
-      {selected ? (
-        <div className="grid lg:grid-cols-[minmax(13rem,1fr)_2fr] gap-4">
-          <div className="timeline-events" aria-label="Events in this period">
-            {events.map((event) => (
-              <button key={event.year} type="button" aria-pressed={selected === event} onClick={() => setFilter(era.id, type, event.year)}>
-                <strong>{event.date}</strong><span>{event.title}</span>
-              </button>
-            ))}
-          </div>
-          <article className="ref-inset space-y-3" aria-live="polite">
-            <p className="ref-kicker">{selected.date} · {selected.place}</p>
-            <h3 className="ref-heading">{selected.title}</h3>
-            <p className="font-reading text-xl">{selected.description}</p>
-            <div className="flex flex-wrap gap-4 text-sm">
-              <ReadingLink href={selected.source}>{selected.sourceLabel}</ReadingLink>
-              {selected.topic && <Link to={'/study/' + selected.topic} className="ref-link">Related study module <ArrowRight size={14} className="inline" /></Link>}
-            </div>
-          </article>
-        </div>
-      ) : <p className="ref-inset" role="status">No selected milestones in this period. Try another category or period.</p>}
+      {events.length ? (
+        <ol className="history-timeline" aria-label={`${era.label} milestones`}>
+          {events.map((event, index) => {
+            const isSelected = event === selected;
+            const side = index % 2 === 0 ? 'right' : 'left';
+            return (
+              <li key={event.year} className="history-timeline__item" data-side={side}>
+                <span className="history-timeline__marker" data-type={event.type} aria-hidden="true" />
+                <article className="history-timeline__card" data-selected={isSelected}>
+                  <button type="button" className="history-timeline__select" aria-pressed={isSelected}
+                    aria-label={`${isSelected ? 'Selected: ' : 'Explore '}${event.date}, ${event.title}`}
+                    onClick={() => setFilter(era.id, type, event.year)}>
+                    <span className="history-timeline__meta"><time>{event.date}</time><span className="history-timeline__type" data-type={event.type}>{event.type}</span></span>
+                    <strong className="history-timeline__title">{event.title}</strong>
+                    <span className="history-timeline__summary">{event.description}</span>
+                    <span className="history-timeline__more">{isSelected ? 'Selected milestone' : 'Explore milestone'} <ArrowRight size={14} aria-hidden="true" /></span>
+                  </button>
+                  {isSelected && (
+                    <div className="history-timeline__details" aria-live="polite">
+                      <span className="history-timeline__place">{event.place}</span>
+                      <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                        <ReadingLink href={event.source}>{event.sourceLabel}</ReadingLink>
+                        {event.topic && <Link to={'/study/' + event.topic} className="ref-link">Related study <ArrowRight size={14} className="inline" /></Link>}
+                      </div>
+                    </div>
+                  )}
+                </article>
+              </li>
+            );
+          })}
+        </ol>
+      ) : <p className="ref-inset" role="status">No milestones match this period and category. Try another filter.</p>}
     </section>
   );
 }
@@ -150,8 +144,9 @@ export function TraditionsView() {
   const families = [...new Set(traditions.map(({ family }) => family))];
   return (
     <div className="ref-page">
-      <header><p className="ref-kicker">Churches & denominations</p><h1 className="ref-title">Christian Traditions</h1>
-        <p className="ref-deck">Explore how Christian communities describe their faith and practices. The profiles identify representative sources and leave room for variation within each family.</p></header>
+      <EditorialHero eyebrow="Churches & denominations" title="Christian traditions"
+        description="Explore how Christian communities describe faith, worship, and practice."
+        image={editorialImages.orthodox.src} imageAlt={editorialImages.orthodox.alt} />
       <div className="tradition-map" aria-label="Traditions grouped by historical family">
         <div className="tradition-root"><GitFork aria-hidden="true" size={18} /> Christian traditions</div>
         <div className="tradition-branches">
@@ -203,12 +198,19 @@ export function BooksView() {
   const filtered = books.filter((book) => (!shelf || book.shelf === shelf) && (book.title + ' ' + book.author + ' ' + book.note).toLowerCase().includes(search.trim().toLowerCase()));
   return (
     <div className="ref-page">
-      <header><p className="ref-kicker">Open reading collection</p><h1 className="ref-title">Christian Books</h1>
-        <p className="ref-deck">A reading shelf of primary texts, theology, and spiritual classics, with links to digital editions.</p></header>
-      <div className="ref-card grid sm:grid-cols-[2fr_1fr] gap-3">
-        <label className="ref-field">Title, author, or subject <span className="relative"><Search aria-hidden="true" className="absolute left-3 top-3" size={15} /><input type="search" className="pl-9 w-full" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search the shelves" /></span></label>
-        <label className="ref-field">Shelf <select value={shelf} onChange={(event) => setShelf(event.target.value)}><option value="">All shelves</option>{shelves.map((item) => <option key={item}>{item}</option>)}</select></label>
-      </div>
+      <EditorialHero eyebrow="Open reading collection" title="Christian books"
+        description="A considered shelf of primary texts, theology, and spiritual classics."
+        image={editorialImages.library.src} imageAlt={editorialImages.library.alt} />
+      <div className="search-results-layout">
+        <SearchFilterPanel title="Search the shelves">
+          <label className="ref-field">Title, author, or subject
+            <span className="relative block"><Search aria-hidden="true" className="absolute left-3 top-3" size={15} /><input type="search" className="pl-9 w-full" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search books" /></span>
+          </label>
+          <label className="ref-field">Shelf
+            <select value={shelf} onChange={(event) => setShelf(event.target.value)}><option value="">All shelves</option>{shelves.map((item) => <option key={item}>{item}</option>)}</select>
+          </label>
+        </SearchFilterPanel>
+        <div className="search-results-layout__results">
       <p className="ref-muted text-sm" role="status">{filtered.length} {filtered.length === 1 ? 'work' : 'works'}</p>
       <div className="grid sm:grid-cols-2 gap-4">
         {filtered.map((book) => (
@@ -225,6 +227,8 @@ export function BooksView() {
         ))}
       </div>
       {filtered.length === 0 && <p className="ref-card">No matching books. Try a different title, author, or shelf.</p>}
+        </div>
+      </div>
     </div>
   );
 }
@@ -237,8 +241,9 @@ export function StudyPathsView({ topics }: { topics: TopicSummary[] }) {
   const finished = (steps: { slug: string }[]) => steps.filter((step) => topicMap.get(step.slug)?.studied).length;
   return (
     <div className="ref-page">
-      <header><p className="ref-kicker">Guided curriculum</p><h1 className="ref-title">Study Paths</h1>
-        <p className="ref-deck">Follow an ordered series of modules. Mark a module studied in the reader to track progress here.</p></header>
+      <EditorialHero eyebrow="Guided curriculum" title="Study paths"
+        description="Follow a thoughtful sequence of studies, at your own pace."
+        image={editorialImages.history.src} imageAlt={editorialImages.history.alt} />
       {path ? (
         <article className="ref-card space-y-5">
           <Link to="/paths" className="ref-link">← All study paths</Link>

@@ -1,7 +1,16 @@
 export const bibleEditions = [
   { id: 'webp', name: 'World English Bible', canon: 'Protestant · 66 books', source: 'https://ebible.org/find/details.php?id=engwebp' },
   { id: 'webc', name: 'World English Bible', canon: 'Catholic · 73 books', source: 'https://ebible.org/find/details.php?id=engwebc' },
+  { id: 'kjv', name: 'King James Version (KJV)', canon: 'Protestant · 66 books', source: 'https://ebible.org/find/show.php?id=eng-kjv2006' },
+  { id: 'asv', name: 'American Standard Version (ASV)', canon: 'Protestant · 66 books', source: 'https://ebible.org/find/show.php?id=eng-asv' },
+  { id: 'bsb', name: 'Berean Standard Bible (BSB)', canon: 'Protestant · 66 books', source: 'https://ebible.org/find/show.php?id=engbsb' },
 ] as const;
+
+// eBible VPL files sometimes use publisher-specific abbreviations; normalize them to the book codes used by the reader.
+export const bibleBookCodeAliases: Record<string, string> = {
+  '1JO': '1JN', '2JO': '2JN', '3JO': '3JN', EZE: 'EZK', JAM: 'JAS',
+  JOE: 'JOL', JOH: 'JHN', MAR: 'MRK', NAH: 'NAM', PHI: 'PHP', SOL: 'SNG',
+};
 
 export type BibleEdition = (typeof bibleEditions)[number]['id'];
 

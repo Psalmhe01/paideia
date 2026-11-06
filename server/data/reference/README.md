@@ -2,6 +2,18 @@
 
 ## World English Bible
 
+The compressed `webp.json.gz` and `webc.json.gz` files are the Protestant and Catholic World English Bible corpora.
+
+## Additional English translations
+
+`kjv.json.gz`, `asv.json.gz`, and `bsb.json.gz` use the eBible.org verse-per-line (VPL) datasets. The repeatable importer is `import_public_bibles.py`, uses only Python's standard library, and normalizes publisher book codes to the canonical book codes used by Paideia.
+
+- King James Version (1769 text): [eBible.org edition page](https://ebible.org/find/show.php?id=eng-kjv2006). Public domain in the United States; eBible.org notes Crown copyright restrictions on printing in the United Kingdom.
+- American Standard Version (1901): [eBible.org edition page](https://ebible.org/find/show.php?id=eng-asv). Public domain.
+- Berean Standard Bible: [eBible.org edition page](https://ebible.org/find/show.php?id=engbsb) and [Berean terms](https://berean.bible/terms.htm). Dedicated to the public domain.
+
+These editions contain the 66-book Protestant canon. They are provided as additional study translations and do not replace the existing World English Bible Catholic edition.
+
 - `webp.json.gz` contains the 66-book Protestant edition with 1,189 chapters. [Edition and downloads](https://ebible.org/find/details.php?id=engwebp).
 - `webc.json.gz` contains the 73-book Catholic edition with 1,328 chapters. [Edition and downloads](https://ebible.org/find/details.php?id=engwebc).
 

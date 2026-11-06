@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   Search,
+  ArrowRight,
   Clock,
   Globe,
   Paperclip,
@@ -11,8 +12,11 @@ import {
   X,
 } from 'lucide-react';
 import type { DisciplineSummary, TopicSummary } from '../types';
-import { getAccentClasses } from './DisciplineIcon';
 import { api } from '../api';
+import { EditorialHero } from './EditorialHero';
+import { editorialImages } from '../data/editorialImages';
+import { studyImageFor } from '../data/editorialImages';
+import { SearchFilterPanel } from './SearchFilterPanel';
 
 export function CatalogView({
   disciplines,
@@ -96,99 +100,45 @@ export function CatalogView({
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Header */}
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <span className="text-xs font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-400">
-            {activeDiscObj ? `${activeDiscObj.greekTitle} • ${activeDiscObj.transliteration}` : 'Complete Curriculum'}
-          </span>
-          <h1 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 dark:text-stone-100">
-            {activeDiscObj ? activeDiscObj.name : 'All Theological Study Topics'}
-          </h1>
-          <p className="text-sm text-stone-600 dark:text-stone-400 max-w-2xl mt-1">
-            {activeDiscObj
-              ? activeDiscObj.description
-              : 'Browse every module across Apologetics, Soteriology, Doctrine, Hermeneutics, Church History, Bible History, Church Fathers, and Moral Theology.'}
-          </p>
-        </div>
-
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2.5 rounded-xl bg-amber-900 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500 text-white text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs transition"
-        >
-          <Plus className="w-4 h-4" />
-          Add Study Topic
+      <EditorialHero
+        eyebrow={activeDiscObj ? `${activeDiscObj.greekTitle} · ${activeDiscObj.transliteration}` : 'Theological curriculum'}
+        title={activeDiscObj ? activeDiscObj.name : 'Study the Christian tradition'}
+        description={activeDiscObj?.description ?? 'Explore doctrine, Scripture, church history, and the questions that shaped Christian thought.'}
+        image={editorialImages.library.src}
+        imageAlt={editorialImages.library.alt}
+        className="page-hero--catalog"
+      >
+        <button onClick={() => setShowCreateModal(true)} className="editorial-button editorial-button--light">
+          <Plus className="w-4 h-4" /> Add a study topic
         </button>
-      </div>
+      </EditorialHero>
 
-      {/* Discipline Filter Pills */}
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => onSelectDiscipline('all')}
-          className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition ${
-            selectedDiscipline === 'all'
-              ? 'bg-stone-900 text-white dark:bg-amber-500 dark:text-stone-950'
-              : 'bg-stone-200/70 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-300/70'
-          }`}
-        >
-          All Wings
-        </button>
-        {disciplines.map((d) => (
-          <button
-            key={d.slug}
-            onClick={() => onSelectDiscipline(d.slug)}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition ${
-              selectedDiscipline === d.slug
-                ? 'bg-amber-900 text-white dark:bg-amber-500 dark:text-stone-950'
-                : 'bg-[#fffdf9] dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:border-amber-700/50'
-            }`}
-          >
-            {d.name}
-          </button>
-        ))}
-      </div>
+      <div className="search-results-layout">
+        <SearchFilterPanel title="Refine study topics">
+          <label className="ref-field">Discipline
+            <select value={selectedDiscipline} onChange={(event) => onSelectDiscipline(event.target.value)}>
+              <option value="all">All disciplines</option>
+              {disciplines.map((discipline) => <option key={discipline.slug} value={discipline.slug}>{discipline.name}</option>)}
+            </select>
+          </label>
+          <label className="ref-field">Search topics
+            <span className="relative block"><Search className="absolute left-3 top-3" size={15} aria-hidden="true" /><input type="search" value={searchQuery} onChange={(event) => onSearchChange(event.target.value)} placeholder="Concept, thinker, council…" className="pl-9 w-full" /></span>
+          </label>
+          <label className="ref-field">Difficulty
+            <select value={difficultyFilter} onChange={(event) => onDifficultyChange(event.target.value)}>
+              <option value="all">All levels</option><option value="Foundational">Foundational</option><option value="Intermediate">Intermediate</option><option value="Advanced">Advanced</option>
+            </select>
+          </label>
+          <label className="ref-field">Study status
+            <select value={statusFilter} onChange={(event) => onStatusChange(event.target.value)}>
+              <option value="all">All statuses</option><option value="unstudied">Unstudied</option><option value="studied">Studied</option><option value="bookmarked">Bookmarked</option>
+            </select>
+          </label>
+          <button type="button" className="ref-button" onClick={() => { onSelectDiscipline('all'); onSearchChange(''); onDifficultyChange('all'); onStatusChange('all'); }}>Reset filters</button>
+        </SearchFilterPanel>
 
-      {/* Search & Filter Bar */}
-      <div className="grid sm:grid-cols-12 gap-3 p-4 rounded-2xl bg-[#fffdf9] dark:bg-stone-900 border border-stone-200 dark:border-stone-800">
-        <div className="sm:col-span-6 relative">
-          <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Filter topics by concept, thinker, council, or Greek/Latin term..."
-            className="w-full pl-10 pr-4 py-2 rounded-xl bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-sm"
-          />
-        </div>
-
-        <div className="sm:col-span-3">
-          <select
-            value={difficultyFilter}
-            onChange={(e) => onDifficultyChange(e.target.value)}
-            className="w-full px-3 py-2 rounded-xl bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-sm"
-          >
-            <option value="all">All Levels</option>
-            <option value="Foundational">Foundational</option>
-            <option value="Intermediate">Intermediate</option>
-            <option value="Advanced">Advanced</option>
-          </select>
-        </div>
-
-        <div className="sm:col-span-3">
-          <select
-            value={statusFilter}
-            onChange={(e) => onStatusChange(e.target.value)}
-            className="w-full px-3 py-2 rounded-xl bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-sm"
-          >
-            <option value="all">All Study Statuses</option>
-            <option value="unstudied">Unstudied</option>
-            <option value="studied">Completed / Studied</option>
-            <option value="bookmarked">Bookmarked</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Topic Grid */}
+        <div className="search-results-layout__results">
+      <p className="ref-muted text-sm" role="status">{topics.length} {topics.length === 1 ? 'study topic' : 'study topics'}</p>
       {topics.length === 0 ? (
         <div className="text-center py-16 rounded-2xl bg-[#fffdf9] dark:bg-stone-900 border border-stone-200 dark:border-stone-800">
           <p className="font-display text-2xl text-stone-700 dark:text-stone-300">
@@ -207,98 +157,46 @@ export function CatalogView({
           </button>
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 gap-5">
+        <div className="grid min-w-0 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {topics.map((topic) => {
-            const accent = getAccentClasses(topic.accentColor);
+            const image = studyImageFor(topic.disciplineSlug, `${topic.title} ${topic.slug}`);
             return (
-              <article
-                key={topic.slug}
-                className="flex flex-col justify-between rounded-2xl bg-[#fffdf9] dark:bg-stone-900 border border-stone-200/90 dark:border-stone-800 p-6 shadow-xs hover:shadow-md hover:border-amber-800/40 dark:hover:border-amber-500/40 transition"
-              >
-                <div className="space-y-3">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${accent.badge}`}>
-                        {topic.disciplineName}
-                      </span>
-                      <span className="px-2 py-0.5 rounded-md bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 text-xs">
-                        {topic.difficulty}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      {topic.studied && (
-                        <span
-                          title="Marked as Studied"
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[11px] font-medium"
-                        >
-                          <CheckCircle2 className="w-3 h-3" /> Studied
-                        </span>
-                      )}
-                      {topic.bookmarked && (
-                        <Bookmark className="w-4 h-4 text-amber-600 fill-amber-600" />
-                      )}
-                    </div>
+              <article key={topic.slug} className="study-topic-card">
+                <button type="button" className="study-topic-card__visual" onClick={() => onOpenTopic(topic.slug)} aria-label={`Open ${topic.title}`}>
+                  <img src={image.src} alt={image.alt} loading="lazy" />
+                  <span className="study-topic-card__shade" aria-hidden="true" />
+                  <span className="study-topic-card__visual-labels"><span>{topic.disciplineName}</span><span>{topic.difficulty}</span></span>
+                  <span className="study-topic-card__visual-status">
+                    {topic.studied && <span><CheckCircle2 size={13} /> Studied</span>}
+                    {topic.bookmarked && <Bookmark size={15} fill="currentColor" aria-label="Bookmarked" />}
+                  </span>
+                  <span className="study-topic-card__visual-link">Explore study <ArrowRight size={14} /></span>
+                </button>
+
+                <div className="study-topic-card__body">
+                  <div className="study-topic-card__title-group">
+                    <p className="study-topic-card__subtitle">{topic.subtitle}</p>
+                    <h2><button type="button" onClick={() => onOpenTopic(topic.slug)}>{topic.title}</button></h2>
                   </div>
+                  <p className="study-topic-card__summary">{topic.summary}</p>
 
-                  <div>
-                    <h2
-                      onClick={() => onOpenTopic(topic.slug)}
-                      className="font-display text-2xl font-bold text-stone-900 dark:text-stone-100 hover:text-amber-800 dark:hover:text-amber-400 cursor-pointer leading-snug"
-                    >
-                      {topic.title}
-                    </h2>
-                    <p className="text-xs font-medium text-stone-500 dark:text-stone-400 mt-0.5">
-                      {topic.subtitle}
-                    </p>
-                  </div>
+                  {topic.scriptureRefs.length > 0 && <div className="study-topic-card__scriptures" aria-label="Key Scripture references">
+                    {topic.scriptureRefs.slice(0, 2).map((ref) => <span key={ref}>{ref}</span>)}
+                    {topic.scriptureRefs.length > 2 && <span>+{topic.scriptureRefs.length - 2}</span>}
+                  </div>}
 
-                  <p className="font-reading text-base text-stone-700 dark:text-stone-300 leading-relaxed line-clamp-3">
-                    {topic.summary}
-                  </p>
-
-                  {topic.scriptureRefs.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {topic.scriptureRefs.slice(0, 4).map((ref) => (
-                        <span
-                          key={ref}
-                          className="text-[11px] px-2 py-0.5 rounded-md bg-amber-50 dark:bg-stone-800/80 text-amber-900 dark:text-amber-300 border border-amber-900/10"
-                        >
-                          {ref}
-                        </span>
-                      ))}
+                  <div className="study-topic-card__footer">
+                    <div className="study-topic-card__meta">
+                      <span><Clock size={13} /> {topic.readingMinutes} min</span>
+                      <span><Globe size={13} /> {topic.sourceCount} sources</span>
+                      {topic.attachmentCount > 0 && <span><Paperclip size={13} /> {topic.attachmentCount} files</span>}
                     </div>
-                  )}
-                </div>
-
-                <div className="pt-4 mt-5 border-t border-stone-200/80 dark:border-stone-800 flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 text-xs text-stone-500 dark:text-stone-400">
-                    <span className="inline-flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" /> {topic.readingMinutes}m
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <Globe className="w-3.5 h-3.5" /> {topic.sourceCount} sources
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <Paperclip className="w-3.5 h-3.5" /> {topic.attachmentCount} files
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {topic.questionCount > 0 && (
-                      <button
-                        onClick={() => onStartTopicQuiz(topic.slug)}
-                        className="px-3 py-1.5 rounded-xl bg-amber-100/90 hover:bg-amber-200 dark:bg-amber-950/70 dark:hover:bg-amber-900 text-amber-900 dark:text-amber-200 text-xs font-semibold inline-flex items-center gap-1 transition"
-                      >
-                        <GraduationCap className="w-3.5 h-3.5" />
-                        Quiz ({topic.questionCount})
-                      </button>
-                    )}
-                    <button
-                      onClick={() => onOpenTopic(topic.slug)}
-                      className="px-4 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 dark:bg-amber-600 dark:hover:bg-amber-500 text-white text-xs font-semibold transition"
-                    >
-                      Open Study Room
-                    </button>
+                    <div className="study-topic-card__actions">
+                      {topic.questionCount > 0 && <button type="button" className="study-topic-card__quiz" onClick={() => onStartTopicQuiz(topic.slug)}>
+                        <GraduationCap size={14} /> Quiz
+                      </button>}
+                      <button type="button" className="study-topic-card__open" onClick={() => onOpenTopic(topic.slug)}>Open study <ArrowRight size={14} /></button>
+                    </div>
                   </div>
                 </div>
               </article>
@@ -306,6 +204,8 @@ export function CatalogView({
           })}
         </div>
       )}
+        </div>
+      </div>
 
       {/* Create Custom Topic Modal */}
       {showCreateModal && (

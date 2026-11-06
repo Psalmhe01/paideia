@@ -20,6 +20,9 @@ import type {
   QuizSubmissionResult,
 } from '../types';
 import { DisciplineIcon, getAccentClasses } from './DisciplineIcon';
+import { EditorialHero } from './EditorialHero';
+import { editorialImages } from '../data/editorialImages';
+import { SearchFilterPanel } from './SearchFilterPanel';
 
 export interface InitialQuizRequest {
   scope: 'topic' | 'discipline';
@@ -559,44 +562,24 @@ export function QuizCenterView({
 
   return (
     <div className="space-y-8 pb-16">
-      {/* Header & Mode Selector */}
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <span className="text-xs font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-400">
-            Γυμνάσιον • Catechetical Testing & Disputation
-          </span>
-          <h1 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 dark:text-stone-100">
-            Theological Quiz Gymnasium
-          </h1>
-          <p className="text-sm text-stone-600 dark:text-stone-400 max-w-2xl mt-1">
-            Test your grasp of Apologetics, Soteriology, Doctrine, Hermeneutics, Bible History, Church History, and the Church Fathers through primary-source attributions and doctrinal scenarios.
-          </p>
-        </div>
-
-        {/* Mode Toggle */}
-        <div className="p-1 rounded-2xl bg-[#fffdf9] dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-center gap-1">
+      <EditorialHero eyebrow="Γυμνάσιον · practice & review" title="Test what you understand"
+        description="Build familiarity with Scripture, doctrine, and the voices of Christian history."
+        image={editorialImages.classical.src} imageAlt={editorialImages.classical.alt} className="page-hero--quiz">
+        <div className="quiz-mode-toggle">
           <button
             onClick={() => setMode('study')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition ${
-              mode === 'study'
-                ? 'bg-amber-900 text-white dark:bg-amber-600'
-                : 'text-stone-600 dark:text-stone-400'
-            }`}
+            className={mode === 'study' ? 'is-selected' : ''}
           >
-            Catechetical Mode (Instant Feedback)
+            Study mode
           </button>
           <button
             onClick={() => setMode('exam')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition ${
-              mode === 'exam'
-                ? 'bg-amber-900 text-white dark:bg-amber-600'
-                : 'text-stone-600 dark:text-stone-400'
-            }`}
+            className={mode === 'exam' ? 'is-selected' : ''}
           >
-            Synod Exam Mode
+            Exam mode
           </button>
         </div>
-      </div>
+      </EditorialHero>
 
       {error && (
         <div className="p-4 rounded-2xl bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200 text-sm">
@@ -757,17 +740,17 @@ export function QuizCenterView({
 
       {/* Topic-by-Topic Quizzes */}
       <section className="space-y-4">
+        <div className="search-results-layout">
+          <SearchFilterPanel title="Find topic quizzes">
+            <label className="ref-field">Search study topics
+              <input type="search" value={topicFilter} onChange={(event) => setTopicFilter(event.target.value)} placeholder="Topic or discipline" />
+            </label>
+          </SearchFilterPanel>
+          <div className="search-results-layout__results">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-display text-2xl font-bold text-stone-900 dark:text-stone-100">
             Topic-Focused Quizzes
           </h2>
-          <input
-            type="text"
-            value={topicFilter}
-            onChange={(e) => setTopicFilter(e.target.value)}
-            placeholder="Filter topic quizzes..."
-            className="px-3.5 py-1.5 rounded-xl bg-[#fffdf9] dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs w-64"
-          />
         </div>
 
         <div className="grid md:grid-cols-2 gap-3">
@@ -798,6 +781,8 @@ export function QuizCenterView({
                 </button>
               </div>
             ))}
+        </div>
+          </div>
         </div>
       </section>
 
