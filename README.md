@@ -41,6 +41,19 @@ Vercel attachment uploads are limited to 4 MB per file to stay within the server
 
 The seed command creates the library corpus in Neon. It does not import local SQLite records. The current local database has no saved notes, quiz attempts, custom records, or uploaded files.
 
+If an existing deployment lists built-in attachments with `0 B` or opens only their short descriptions, repair their generated file metadata without reseeding quiz history:
+
+```powershell
+$env:DATABASE_URL = Read-Host 'Paste Neon pooled connection string'
+try {
+  npm.cmd run seed:attachments
+} finally {
+  Remove-Item Env:DATABASE_URL -ErrorAction SilentlyContinue
+}
+```
+
+Use the Neon connection string for the same production database branch as the Vercel project. The repair preserves existing attachment IDs and custom attachments; push the current source so Vercel can publish the regenerated PDFs.
+
 ## Reading rooms
 
 | Room | Route | What you can do |

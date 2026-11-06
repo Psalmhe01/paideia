@@ -12,6 +12,7 @@
     "build:seed-assets": "tsx server/buildSeedAssets.ts",
     "start": "tsx server/index.ts",
     "seed": "tsx server/seedCli.ts",
+    "seed:attachments": "tsx server/repairSeedAttachments.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
